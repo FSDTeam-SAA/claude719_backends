@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Login Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f0f2f5;
+    }
+    h1 {
+      color: #333;
+    }
+    #googleButton {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #4285F4;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    #tokenBox {
+      margin-top: 20px;
+      width: 90%;
+      max-width: 500px;
+      word-break: break-all;
+      background: #fff;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+  </style>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <h1>Google Login Demo</h1>
+  <button id="googleButton">Login with Google</button>
+
+  <div id="tokenBox">ID Token will appear here</div>
+
+  <script>
+    const clientId = "523519229268-rshgm9meiom6f69er3vhevo2jctsili3.apps.googleusercontent.com"; // 🔑 এখানে তোমার GOOGLE_CLIENT_ID দিবে
+
+    const tokenBox = document.getElementById("tokenBox");
+
+    window.onload = function() {
+      google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleCredentialResponse
+      });
+      google.accounts.id.renderButton(
+        document.getElementById("googleButton"),
+        { theme: "outline", size: "large" }
+      );
+    };
+
+    function handleCredentialResponse(response) {
+      console.log("ID Token:", response.credential);
+      tokenBox.textContent = response.credential;
+
+      // Optional: Backend POST
+      fetch("http://localhost:5000/api/auth/google-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken: response.credential })
+      })
+      .then(res => res.json())
+      .then(data => console.log("Backend Response:", data))
+      .catch(err => console.error(err));
+    }
+  </script>
+</body>
+</html>
