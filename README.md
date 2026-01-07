@@ -1,0 +1,66 @@
+NODE_ENV=development
+PORT=5000
+MONGO_URI=mongodb+srv://fsdteamsaa:7skzQQLzi0conWhl@cluster0.fnmxebl.mongodb.net/claude719?retryWrites=true&w=majority&appName=Cluster0
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRE=1h
+
+BCRYPT_SALT_ROUNDS=10
+
+# backend
+# SXYDzwQ1j1vpkxDq
+
+
+ACCESS_TOKEN_SECRET=jishad-backend
+ACCESS_TOKEN_EXPIRES=7d
+REFRESH_TOKEN_SECRET=jishad-backend-refech
+REFRESH_TOKEN_EXPIRES=90d
+
+
+# CLOUDINARY_CLOUD_NAME=dw5wizivl
+# CLOUDINARY_API_KEY=831625278539995
+# CLOUDINARY_API_SECRET=1U-4DALTrkdRvlzrEIaUq0DVW_8
+
+# my cloudinary
+
+CLOUDINARY_CLOUD_NAME=dlpdumtua
+CLOUDINARY_API_KEY=883319152857646
+CLOUDINARY_API_SECRET=321XZDG7vEbm1b7bQJoBU8zAMKg
+
+
+EMAIL_EXPIRES=900000  
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587  
+EMAIL_ADDRESS=sauravsarkar.developer@gmail.com
+EMAIL_PASS=jkunziohwbjrckcl
+EMAIL_FROM=sauravsarkar.developer@gmail.com
+EMAIL_TO=""
+ADMIN_EMAIL=saurav.bdcalling@gmail.com
+
+
+# // Stripe configuration
+# STRIPE_SECRET_KEY=sk_test_51RTELDC2b1Ni0ikV0643xxx29ynbVyn2v95o3Xmz7I6tYSUS5kxUZz5xBbY21nNGKoTWTgaMa51a2YSUo3WaMBqz00aTaGmthQ
+# STRIPE_WEBHOOK_SECRET=whsec_NIFBvGBLSi4tSQtDEi4kmHTEj3SnTjfJ
+
+# # //my stripe
+# STRIPE_SECRET_KEY=sk_test_51RyT6bR2OIMg8d3kIzxayAF3lATTzqwzNB1cxOSyxFb0RB7Ilq5zPCjdLORr9w4JWITISCwvMtJEHEcaen4i2zxi00CMsvnTZN
+# STRIPE_WEBHOOK_SECRET=whsec_8Q8yuYPQeBrWPXNAFOaWHyrxIBJBg9Uw
+
+# test mood
+# tolita@denipl.net
+# Sauravsarkar..11
+STRIPE_SECRET_KEY=sk_test_51SSE8YGcSUcKVQJqGKNFmeWQ2Vl8AqGcX3XkXizBceJryOgJeFm19XvkfOajJ14cmCnfUhzflSSffeOyUKUNx3Jl00XCmtgtI4
+STRIPE_WEBHOOK_SECRET=whsec_hnUVi4l4iyP4MLdn8hmm9kqkTvhfXxOx
+STRIPE_PLATFORM_ACCOUNT_ID=acct_1SSE8YGcSUcKVQJq
+
+#oauth
+GOOGLE_CLIENT_ID=523519229268-rshgm9meiom6f69er3vhevo2jctsili3.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
+
+
+
+FRONTEND_URL=http://localhost:3000
+
+
+RATE_LIMIT_WINDOW=15m
+RATE_LIMIT_MAX=100
+RATE_LIMIT_DELAY=50
