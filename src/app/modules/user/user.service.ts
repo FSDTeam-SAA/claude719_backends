@@ -12,7 +12,6 @@ import Setpieces from '../setpieces/setpieces.model';
 import TransferHistory from '../transferhistory/transferhistory.model';
 import { userRole } from './user.constant';
 
-
 import { IUser } from './user.interface';
 import User from './user.model';
 
@@ -38,6 +37,10 @@ const getAllUser = async (params: any, options: IOption) => {
     'position',
     'category',
   ];
+
+  andCondition.push({
+    role: { $in: ['player', 'gk'] },
+  });
 
   if (searchTerm) {
     andCondition.push({
@@ -87,7 +90,7 @@ const getUserById = async (id: string) => {
 };
 
 const getSingleUserDetails = async (id: string) => {
-  const user = await User.findById(id).select("-password");
+  const user = await User.findById(id).select('-password');
   if (!user) {
     throw new AppError(404, 'User not found');
   }
