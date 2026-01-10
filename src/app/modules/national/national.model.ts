@@ -29,6 +29,9 @@ const nationalSchema = new mongoose.Schema<INational>(
       type: Number,
       default: 0,
     },
+    category: {
+      type: String,
+    },
   },
   { timestamps: true },
 );
