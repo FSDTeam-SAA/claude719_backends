@@ -8,4 +8,5 @@ export interface INational {
   goals?: number;
   debut?: Date;
   match?: number;
+  category?: string;
 }
