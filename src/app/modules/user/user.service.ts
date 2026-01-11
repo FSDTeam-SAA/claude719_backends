@@ -36,6 +36,7 @@ const getAllUser = async (params: any, options: IOption) => {
     'citizenship',
     'position',
     'category',
+    'jerseyNumber',
   ];
 
   andCondition.push({

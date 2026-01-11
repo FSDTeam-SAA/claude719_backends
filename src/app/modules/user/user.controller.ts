@@ -23,6 +23,7 @@ const getAllUser = catchAsync(async (req, res) => {
     'citizenship',
     'position',
     'category',
+    'jerseyNumber',
   ]);
   const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
   const result = await userService.getAllUser(filters, options);
