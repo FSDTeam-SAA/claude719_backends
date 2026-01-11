@@ -9,6 +9,7 @@ const foulsSchema = new mongoose.Schema<IFouls>(
     foulswon:{type:Number,default:0},
     redCards:{type:Number,default:0},
     yellowCards:{type:Number,default:0},
+    offSide:{type:Number, default:0}
   },
   { timestamps: true },
 );
