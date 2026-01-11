@@ -7,4 +7,5 @@ export interface IFouls {
   foulswon?: number;
   yellowCards?: number;
   redCards?: number;
+  offSide?: number;
 }
