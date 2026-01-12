@@ -16,18 +16,18 @@ const createFouls = catchAsync(async (req, res) => {
   });
 });
 
-const createOrUpdateFouls = catchAsync(async (req, res) => {
-  const { id } = req.params;
+// const createOrUpdateFouls = catchAsync(async (req, res) => {
+//   const { id } = req.params;
 
-  const result = await foulsService.createOrUpdateFouls(id!, req.body);
+//   const result = await foulsService.createOrUpdateFouls(id!, req.body);
 
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: 'Fouls updated successfully',
-    data: result,
-  });
-});
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'Fouls updated successfully',
+//     data: result,
+//   });
+// });
 
 const getAllFouls = catchAsync(async (req, res) => {
   const { id } = req.params;
@@ -79,7 +79,7 @@ const deleteFouls = catchAsync(async (req, res) => {
 });
 export const foulsController = {
   createFouls,
-  createOrUpdateFouls,
+  // createOrUpdateFouls,
   getAllFouls,
   getSingleFouls,
   updateFouls,

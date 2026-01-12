@@ -9,16 +9,16 @@ router.get(
   auth(userRole.admin),
   attackingstatController.getSingleAttackingstat,
 );
-// router.post(
-//   '/:id',
-//   auth(userRole.admin),
-//   attackingstatController.createAttackingstat,
-// );
 router.post(
   '/:id',
   auth(userRole.admin),
-  attackingstatController.createOrUpdateAttackingstat,
+  attackingstatController.createAttackingstat,
 );
+// router.post(
+//   '/:id',
+//   auth(userRole.admin),
+//   attackingstatController.createOrUpdateAttackingstat,
+// );
 router.get(
   '/:id',
   auth(userRole.admin),

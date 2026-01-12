@@ -16,18 +16,18 @@ const createAttackingstat = catchAsync(async (req, res) => {
   });
 });
 
-const createOrUpdateAttackingstat = catchAsync(async (req, res) => {
-  const { id } = req.params;
+// const createOrUpdateAttackingstat = catchAsync(async (req, res) => {
+//   const { id } = req.params;
 
-  const result = await attackingstatService.createOrUpdateAttackingstat(id!, req.body);
+//   const result = await attackingstatService.createOrUpdateAttackingstat(id!, req.body);
 
-  sendResponse(res, {
-    statusCode: 201,
-    success: true,
-    message: 'Attackingstat created successfully',
-    data: result,
-  });
-});
+//   sendResponse(res, {
+//     statusCode: 201,
+//     success: true,
+//     message: 'Attackingstat created successfully',
+//     data: result,
+//   });
+// });
 
 const getAllAttackingstat = catchAsync(async (req, res) => {
   const { id } = req.params;
@@ -79,7 +79,7 @@ const deleteAttackingstat = catchAsync(async (req, res) => {
 });
 export const attackingstatController = {
   createAttackingstat,
-  createOrUpdateAttackingstat,
+  // createOrUpdateAttackingstat,
   getAllAttackingstat,
   getSingleAttackingstat,
   updateAttackingstat,

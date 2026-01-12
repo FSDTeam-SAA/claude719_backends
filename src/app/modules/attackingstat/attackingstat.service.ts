@@ -25,54 +25,54 @@ const createAttackingstat = async (userId: string, payload: IAttackingstat) => {
   return result;
 };
 
-const createOrUpdateAttackingstat = async (
-  userId: string,
-  payload: IAttackingstat,
-) => {
-  const user = await User.findById(userId);
-  if (!user) throw new AppError(404, 'User not found');
+// const createOrUpdateAttackingstat = async (
+//   userId: string,
+//   payload: IAttackingstat,
+// ) => {
+//   const user = await User.findById(userId);
+//   if (!user) throw new AppError(404, 'User not found');
 
-  let filter: any = {};
-  let incData: any = {};
-  let setOnInsertData: any = {};
+//   let filter: any = {};
+//   let incData: any = {};
+//   let setOnInsertData: any = {};
 
-  const numericFields = [
-    'goals',
-    'assists',
-    'shotsNsidePr',
-    'shotsOutsidePa',
-  ] as const;
+//   const numericFields = [
+//     'goals',
+//     'assists',
+//     'shotsNsidePr',
+//     'shotsOutsidePa',
+//   ] as const;
 
-  numericFields.forEach((field) => {
-    if (payload[field] !== undefined) {
-      incData[field] = payload[field];
-    }
-  });
+//   numericFields.forEach((field) => {
+//     if (payload[field] !== undefined) {
+//       incData[field] = payload[field];
+//     }
+//   });
 
-  if (user.role === userRole.player) {
-    filter.player = user._id;
-    setOnInsertData.player = user._id;
-  }
+//   if (user.role === userRole.player) {
+//     filter.player = user._id;
+//     setOnInsertData.player = user._id;
+//   }
 
-  if (user.role === userRole.gk) {
-    filter.gk = user._id;
-    setOnInsertData.gk = user._id;
-  }
+//   if (user.role === userRole.gk) {
+//     filter.gk = user._id;
+//     setOnInsertData.gk = user._id;
+//   }
 
-  const result = await Attackingstat.findOneAndUpdate(
-    filter,
-    {
-      $inc: incData,
-      $setOnInsert: setOnInsertData,
-    },
-    {
-      new: true,
-      upsert: true,
-    },
-  );
+//   const result = await Attackingstat.findOneAndUpdate(
+//     filter,
+//     {
+//       $inc: incData,
+//       $setOnInsert: setOnInsertData,
+//     },
+//     {
+//       new: true,
+//       upsert: true,
+//     },
+//   );
 
-  return result;
-};
+//   return result;
+// };
 
 const getAllAttackingstat = async (
   userId: string,
@@ -171,7 +171,7 @@ const deleteAttackingstat = async (id: string) => {
 
 export const attackingstatService = {
   createAttackingstat,
-  createOrUpdateAttackingstat,
+  // createOrUpdateAttackingstat,
   getAllAttackingstat,
   getSingleAttackingstat,
   updateAttackingstat,
