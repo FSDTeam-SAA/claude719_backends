@@ -22,52 +22,52 @@ const createFouls = async (userId: string, payload: IFouls) => {
   return result;
 };
 
-const createOrUpdateFouls = async (userId: string, payload: IFouls) => {
-  const user = await User.findById(userId);
-  if (!user) throw new AppError(404, 'User not found');
+// const createOrUpdateFouls = async (userId: string, payload: IFouls) => {
+//   const user = await User.findById(userId);
+//   if (!user) throw new AppError(404, 'User not found');
 
-  let filter: any = {};
-  let incData: any = {};
-  let setOnInsertData: any = {};
+//   let filter: any = {};
+//   let incData: any = {};
+//   let setOnInsertData: any = {};
 
-  const numericFields = [
-    'fouls',
-    'foulswon',
-    'redCards',
-    'yellowCards',
-    'offside',
-  ] as const;
+//   const numericFields = [
+//     'fouls',
+//     'foulswon',
+//     'redCards',
+//     'yellowCards',
+//     'offside',
+//   ] as const;
 
-  numericFields.forEach((field) => {
-    if (payload[field] !== undefined) {
-      incData[field] = payload[field];
-    }
-  });
+//   numericFields.forEach((field) => {
+//     if (payload[field] !== undefined) {
+//       incData[field] = payload[field];
+//     }
+//   });
 
-  if (user.role === userRole.player) {
-    filter.player = user._id;
-    setOnInsertData.player = user._id;
-  }
+//   if (user.role === userRole.player) {
+//     filter.player = user._id;
+//     setOnInsertData.player = user._id;
+//   }
 
-  if (user.role === userRole.gk) {
-    filter.gk = user._id;
-    setOnInsertData.gk = user._id;
-  }
+//   if (user.role === userRole.gk) {
+//     filter.gk = user._id;
+//     setOnInsertData.gk = user._id;
+//   }
 
-  const result = await Fouls.findOneAndUpdate(
-    filter,
-    {
-      $inc: incData,
-      $setOnInsert: setOnInsertData,
-    },
-    {
-      new: true,
-      upsert: true,
-    },
-  );
+//   const result = await Fouls.findOneAndUpdate(
+//     filter,
+//     {
+//       $inc: incData,
+//       $setOnInsert: setOnInsertData,
+//     },
+//     {
+//       new: true,
+//       upsert: true,
+//     },
+//   );
 
-  return result;
-};
+//   return result;
+// };
 
 const getAllFouls = async (
   userId: string,
@@ -163,7 +163,7 @@ const deleteFouls = async (id: string) => {
 
 export const foulsService = {
   createFouls,
-  createOrUpdateFouls,
+  // createOrUpdateFouls,
   getAllFouls,
   getSingleFouls,
   updateFouls,
