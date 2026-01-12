@@ -41,7 +41,7 @@ export interface IUser {
 
   // admin profile
   designation?: string;
-  accessLavel?: string[];
+  accessLavel?: string;
   lastLogin?: Date;
   numberOfGame: number;
   team: Types.ObjectId;

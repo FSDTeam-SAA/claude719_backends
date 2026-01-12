@@ -215,9 +215,9 @@ const updateMyProfile = async (
     throw new AppError(404, 'User not found');
   }
 
-  if (user.role !== userRole.admin && !user.isSubscription) {
-    throw new AppError(403, 'Please subscribe to access this feature');
-  }
+  // if (user.role !== userRole.admin && !user.isSubscription) {
+  //   throw new AppError(403, 'Please subscribe to access this feature');
+  // }
   if (file) {
     const uploadProfile = await fileUploader.uploadToCloudinary(file);
     if (!uploadProfile?.url) {
