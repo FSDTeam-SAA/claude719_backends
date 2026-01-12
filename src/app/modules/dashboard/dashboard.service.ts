@@ -1,6 +1,8 @@
+import pagination, { IOption } from '../../helper/pagenation';
 import Contact from '../contact/contact.model';
 import Gkstats from '../gkstats/gkstats.model';
 import Payment from '../payment/payment.model';
+import Team from '../team/team.model';
 import { userRole } from '../user/user.constant';
 import User from '../user/user.model';
 
@@ -61,142 +63,6 @@ const getMonthlyReveneueChart = async (year: number) => {
   return result;
 };
 
-
-// const getAllPlayersRevenue = async ( params: any, options: IOption,) => {
-
-//   const { page, limit, skip, sortBy, sortOrder } = pagination(options);
-//   const { searchTerm, year, ...filterData } = params;
-//   const andCondition: any[] = [];
-//   const userSearchableFields = [
-//     'firstName',
-//     'lastName',
-//     'category',
-//     'teamName',
-//     'league',
-//   ];
-//   if (searchTerm) {
-//     andCondition.push({
-//       $or: userSearchableFields.map((field) => ({
-//         [field]: { $regex: searchTerm, $options: 'i' },
-//       })),
-//     });
-//   }
-
-//   if (Object.keys(filterData).length) {
-//     andCondition.push({
-//       $and: Object.entries(filterData).map(([field, value]) => ({
-//         [field]: value,
-//       })),
-//     });
-//   }
-//    // YEAR Filter → createdAt
-//   if (year) {
-//     const startDate = new Date(`${year}-01-01T00:00:00.000Z`);
-//     const endDate = new Date(`${year}-12-31T23:59:59.999Z`);
-
-//     andCondition.push({
-//       createdAt: {
-//         $gte: startDate,
-//         $lte: endDate,
-//       },
-//     });
-//   }
-//   const whereCondition = andCondition.length > 0 ? { $and: andCondition } : {};
-
-//   const result = await Payment.aggregate([
-//     {
-//       $match: {
-//         status: 'completed',
-//         paymentType: 'Individual',
-//       },
-//     },
-
-//     {
-//       $facet: {
-//         totalRevenue: [
-//           {
-//             $group: {
-//               _id: null,
-//               totalRevenue: { $sum: '$amount' },
-//               totalPayments: { $sum: 1 },
-//             },
-//           },
-//         ],
-
-//         players: [
-//           {
-//             $group: {
-//               _id: '$user',
-//               totalRevenue: { $sum: '$amount' },
-//               totalPayments: { $sum: 1 },
-//             },
-//           },
-
-//           {
-//             $lookup: {
-//               from: 'users',
-//               localField: '_id',
-//               foreignField: '_id',
-//               as: 'user',
-//             },
-//           },
-//           { $unwind: '$user' },
-
-//           {
-//             $match: {
-//               'user.role': 'player',
-//             },
-//           },
-
-//           {
-//             $project: {
-//               _id: 0,
-//               player: {
-//                 id: '$user._id',
-//                 name: {
-//                   $concat: ['$user.firstName', ' ', '$user.lastName'],
-//                 },
-//                 email: '$user.email',
-//                 teamName: '$user.teamName', 
-//                 category: '$user.category',
-//                 league: '$user.league',
-//                 teamLocation: '$user.teamLocation'
-//               },
-//               totalRevenue: 1,
-//               totalPayments: 1,
-//             },
-//           },
-
-//           { $sort: { totalRevenue: -1 } },
-//         ],
-//       },
-//     },
-
-//     {
-//       $project: {
-//         totalRevenue: {
-//           $ifNull: [{ $arrayElemAt: ['$totalRevenue.totalRevenue', 0] }, 0],
-//         },
-//         totalPayments: {
-//           $ifNull: [{ $arrayElemAt: ['$totalRevenue.totalPayments', 0] }, 0],
-//         },
-//         players: 1,
-//       },
-//     },
-//   ]);
-
-//   const total = await Payment.countDocuments(whereCondition);
-//   return {
-//     totalRevenue: result[0]?.totalRevenue || 0,
-//     totalPayments: result[0]?.totalPayments || 0,
-//     players: result[0]?.players || [],
-//     meta: {
-//       total,
-//       page,
-//       limit,
-//     },
-//   };
-// };
 const getAllPlayersRevenue = async (params: any, options: IOption) => {
   const { page, limit, skip, sortBy, sortOrder } = pagination(options);
   const { searchTerm, year, ...filterData } = params;
