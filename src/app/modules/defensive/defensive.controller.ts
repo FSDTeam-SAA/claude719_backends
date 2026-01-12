@@ -16,6 +16,19 @@ const createDefensive = catchAsync(async (req, res) => {
   });
 });
 
+// const createOrUpdateDefensive = catchAsync(async (req, res) => {
+//   const { id } = req.params;
+
+//   const result = await defensiveService.createOrUpdateDefensive(id!, req.body);
+
+//   sendResponse(res, {
+//     statusCode: 201,
+//     success: true,
+//     message: 'defensive created successfully',
+//     data: result,
+//   });
+// });
+
 const getAllDefensive = catchAsync(async (req, res) => {
   const { id } = req.params;
   const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
@@ -67,6 +80,7 @@ const deleteDefensive = catchAsync(async (req, res) => {
 
 export const defensiveController = {
   createDefensive,
+  // createOrUpdateDefensive,
   getAllDefensive,
   getSingleNational,
   updateDefensive,

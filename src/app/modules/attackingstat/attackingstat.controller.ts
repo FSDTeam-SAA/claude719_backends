@@ -16,6 +16,19 @@ const createAttackingstat = catchAsync(async (req, res) => {
   });
 });
 
+// const createOrUpdateAttackingstat = catchAsync(async (req, res) => {
+//   const { id } = req.params;
+
+//   const result = await attackingstatService.createOrUpdateAttackingstat(id!, req.body);
+
+//   sendResponse(res, {
+//     statusCode: 201,
+//     success: true,
+//     message: 'Attackingstat created successfully',
+//     data: result,
+//   });
+// });
+
 const getAllAttackingstat = catchAsync(async (req, res) => {
   const { id } = req.params;
   const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
@@ -66,6 +79,7 @@ const deleteAttackingstat = catchAsync(async (req, res) => {
 });
 export const attackingstatController = {
   createAttackingstat,
+  // createOrUpdateAttackingstat,
   getAllAttackingstat,
   getSingleAttackingstat,
   updateAttackingstat,

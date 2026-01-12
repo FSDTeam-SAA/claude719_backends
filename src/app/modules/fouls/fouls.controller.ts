@@ -16,6 +16,19 @@ const createFouls = catchAsync(async (req, res) => {
   });
 });
 
+// const createOrUpdateFouls = catchAsync(async (req, res) => {
+//   const { id } = req.params;
+
+//   const result = await foulsService.createOrUpdateFouls(id!, req.body);
+
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'Fouls updated successfully',
+//     data: result,
+//   });
+// });
+
 const getAllFouls = catchAsync(async (req, res) => {
   const { id } = req.params;
   const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
@@ -66,6 +79,7 @@ const deleteFouls = catchAsync(async (req, res) => {
 });
 export const foulsController = {
   createFouls,
+  // createOrUpdateFouls,
   getAllFouls,
   getSingleFouls,
   updateFouls,
