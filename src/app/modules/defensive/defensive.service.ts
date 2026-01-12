@@ -29,6 +29,63 @@ const createDefensive = async (
   }
 };
 
+const createOrUpdateDefensive = async (userId: string, payload: IDefensive) => {
+  const user = await User.findById(userId);
+  if (!user) throw new AppError(404, 'User not found');
+
+  let filter: any = {};
+  let incData: any = {};
+  let setOnInsertData: any = {};
+
+  const numericFields = [
+    'tackleAttempts',
+    'tackleSucceededPossession',
+    'tackleSucceededNOPossession',
+    'tackleFailed',
+    'turnoverwon',
+    'interceptions',
+    'recoveries',
+    'clearance',
+    'totalBlocked',
+    'shotBlocked',
+    'crossBlocked',
+    'mistakes',
+    'aerialDuels',
+    'phvsicalDuels',
+    'ownGoals',
+  ] as const;
+
+  numericFields.forEach((field) => {
+    if (payload[field] !== undefined) {
+      incData[field] = payload[field];
+    }
+  });
+
+  if (user.role === userRole.player) {
+    filter.player = user._id;
+    setOnInsertData.player = user._id;
+  }
+
+  if (user.role === userRole.gk) {
+    filter.gk = user._id;
+    setOnInsertData.gk = user._id;
+  }
+
+  const result = await Defensive.findOneAndUpdate(
+    filter,
+    {
+      $inc: incData,
+      $setOnInsert: setOnInsertData,
+    },
+    {
+      new: true,
+      upsert: true,
+    },
+  );
+
+  return result;
+};
+
 const getAllDefensive = async (
   userId: string,
   //   params: any,
@@ -122,6 +179,7 @@ const deleteDefensive = async (id: string) => {
 };
 export const defensiveService = {
   createDefensive,
+  createOrUpdateDefensive,
   getAllDefensive,
   getSingleDefensive,
   updateNational,

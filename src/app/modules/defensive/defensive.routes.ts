@@ -10,11 +10,17 @@ router.get(
   auth(userRole.admin),
   defensiveController.getSingleNational,
 );
+// router.post(
+//   '/:id',
+//   auth(userRole.admin),
+//   fileUploader.upload.single('flag'),
+//   defensiveController.createDefensive,
+// );
 router.post(
   '/:id',
   auth(userRole.admin),
   fileUploader.upload.single('flag'),
-  defensiveController.createDefensive,
+  defensiveController.createOrUpdateDefensive,
 );
 router.get('/:id', auth(userRole.admin), defensiveController.getAllDefensive);
 router.put(
