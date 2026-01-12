@@ -155,6 +155,12 @@ const userSchema = new Schema<IUser>(
     teamLocation: {
       type: String,
     },
+    address: {
+      type: String,
+    },
+    joiningDate: {
+      type: Date,
+    },
   },
   { timestamps: true },
 );
