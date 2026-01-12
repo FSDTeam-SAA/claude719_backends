@@ -9,10 +9,15 @@ router.get(
   auth(userRole.admin),
   attackingstatController.getSingleAttackingstat,
 );
+// router.post(
+//   '/:id',
+//   auth(userRole.admin),
+//   attackingstatController.createAttackingstat,
+// );
 router.post(
   '/:id',
   auth(userRole.admin),
-  attackingstatController.createAttackingstat,
+  attackingstatController.createOrUpdateAttackingstat,
 );
 router.get(
   '/:id',
