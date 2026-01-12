@@ -1,3 +1,4 @@
+import pick from '../../helper/pick';
 import catchAsync from '../../utils/catchAsycn';
 import sendResponse from '../../utils/sendResponse';
 import { dashboardService } from './dashboard.service';
