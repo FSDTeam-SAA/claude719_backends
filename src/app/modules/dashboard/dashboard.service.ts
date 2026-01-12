@@ -1,23 +1,17 @@
-import pagination, { IOption } from "../../helper/pagenation";
-import Contact from "../contact/contact.model";
-import Gkstats from "../gkstats/gkstats.model";
-import Payment from "../payment/payment.model";
-import Team from "../team/team.model";
-import { userRole } from "../user/user.constant";
-import User from "../user/user.model"
+import Contact from '../contact/contact.model';
+import Gkstats from '../gkstats/gkstats.model';
+import Payment from '../payment/payment.model';
+import { userRole } from '../user/user.constant';
+import User from '../user/user.model';
 
-const dashboardOverview = async(userId: string) => {
+const dashboardOverview = async (userId: string) => {
+  const totalPlayers = await User.countDocuments({ role: userRole.player });
+  const totalContact = await Contact.countDocuments();
+  const totalGk = await Gkstats.countDocuments();
+  const totalRevenew = await Payment.countDocuments({ status: 'completed' });
 
-    const totalPlayers = await User.countDocuments( {role:userRole.player} );
-    const totalContact = await Contact.countDocuments();
-    const totalGk = await Gkstats.countDocuments();
-    const totalRevenew = await Payment.countDocuments( {status:'completed'});
-
-    return { totalRevenew, totalPlayers, totalContact, totalGk };
-
-
-}
-
+  return { totalRevenew, totalPlayers, totalContact, totalGk };
+};
 
 const getMonthlyReveneueChart = async (year: number) => {
   const data = await Payment.aggregate([
@@ -42,12 +36,22 @@ const getMonthlyReveneueChart = async (year: number) => {
   ]);
 
   const months = [
-    'Jan','Feb','Mar','Apr','May','Jun',
-    'Jul','Aug','Sep','Oct','Nov','Dec'
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
 
   const result = months.map((month, index) => {
-    const found = data.find(d => d._id.month === index + 1);
+    const found = data.find((d) => d._id.month === index + 1);
     return {
       month,
       revenue: found ? found.revenue : 0,
@@ -483,4 +487,4 @@ export const dashboardService = {
     singleTeamView,
     deletePlayerAccount,
     deleteTeamAccount
-} 
+};

@@ -7,6 +7,7 @@ const router = express.Router();
 router.get('/single/:id', auth(userRole.admin), foulsController.getSingleFouls);
 
 router.post('/:id', auth(userRole.admin), foulsController.createFouls);
+// router.post('/:id', auth(userRole.admin), foulsController.createOrUpdateFouls);
 
 router.get('/:id', auth(userRole.admin), foulsController.getAllFouls);
 

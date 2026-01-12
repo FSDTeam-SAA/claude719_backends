@@ -54,6 +54,9 @@ const userSchema = new Schema<IUser>(
     stripeAccountId: {
       type: String,
     },
+    jerseyNumber: {
+      type: String,
+    },
 
     // user profile
     gender: {

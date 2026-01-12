@@ -14,9 +14,9 @@ const ratingSchema = new mongoose.Schema<IRating>(
     rating: {
       type: Number,
     },
-    position: {
+    position: [{
       type: String,
-    },
+    }],
     numberOfGames: {
       type: Number,
     },
