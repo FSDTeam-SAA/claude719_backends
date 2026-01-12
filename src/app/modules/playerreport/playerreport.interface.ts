@@ -8,7 +8,7 @@ export interface IPlayerReport {
   category?: string;
   gameTitle?: string;
   rating?: number;
-  position?: string;
+  position?: string[];
   minutesPlayed?: number;
   deFensiveSummary?: string;
   strengths?: string;
