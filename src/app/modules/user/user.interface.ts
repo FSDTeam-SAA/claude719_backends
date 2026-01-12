@@ -46,6 +46,7 @@ export interface IUser {
   numberOfGame: number;
   team: Types.ObjectId;
   teamName?: string;
+  teamLocation?:string;
 
   createdAt: Date;
   updatedAt: Date;
