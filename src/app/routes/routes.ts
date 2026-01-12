@@ -15,6 +15,7 @@ import { setpiecesRouter } from '../modules/setpieces/setpieces.routes';
 import { foulsRouter } from '../modules/fouls/fouls.routes';
 import { playerReportRouter } from '../modules/playerreport/playerreport.routes';
 import { teamRouter } from '../modules/team/team.routes';
+import { dashboardRouter } from '../modules/dashboard/dashboard.routes';
 
 const router = Router();
 
@@ -82,6 +83,10 @@ const moduleRoutes = [
   {
     path: '/team',
     route: teamRouter,
+  },
+  {
+    path: '/dashboard',
+    route: dashboardRouter,
   },
 ];
 
