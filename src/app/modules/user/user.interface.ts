@@ -32,6 +32,9 @@ export interface IUser {
   institute?: string;
   gpa?: string;
   playingVideo?: string[];
+  address?: string;
+  joiningDate?: Date;
+  // designation?: string;
 
   isSubscription?: boolean;
   subscription?: Types.ObjectId;
