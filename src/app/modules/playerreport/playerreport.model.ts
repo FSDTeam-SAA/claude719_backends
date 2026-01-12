@@ -28,10 +28,10 @@ const playerReportSchema = new Schema<IPlayerReport>(
       min: 0,
       max: 10,
     },
-    position: {
+    position: [{
       type: String,
       trim: true,
-    },
+    }],
     minutesPlayed: {
       type: Number,
       min: 0,
