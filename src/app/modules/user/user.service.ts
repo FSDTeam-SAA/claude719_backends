@@ -4,6 +4,7 @@ import pagination, { IOption } from '../../helper/pagenation';
 import Defensive from '../defensive/defensive.model';
 import Distributionstats from '../distributionstats/distributionstats.model';
 import Fouls from '../fouls/fouls.model';
+import GkDistributionStats from '../gkdistributionstats/gkdistributionstats.model';
 import Gkstats from '../gkstats/gkstats.model';
 import National from '../national/national.model';
 import PlayerReport from '../playerreport/playerreport.model';
@@ -109,6 +110,7 @@ const getSingleUserDetails = async (id: string) => {
     national: await National.find(matchField),
     reports: await PlayerReport.find(matchField),
     transferHistory: await TransferHistory.find(matchField),
+    gkDistributionStats: await GkDistributionStats.find(matchField),
   };
 };
 
@@ -176,6 +178,7 @@ const profile = async (id: string) => {
     national,
     reports,
     transferHistory,
+    gkDistributionStats,
   ] = await Promise.all([
     Rating.find(matchField),
     Gkstats.find(matchField),
@@ -186,6 +189,7 @@ const profile = async (id: string) => {
     National.find(matchField),
     PlayerReport.find(matchField),
     TransferHistory.find(matchField),
+    GkDistributionStats.find(matchField),
   ]);
 
   return {
@@ -198,6 +202,7 @@ const profile = async (id: string) => {
       distribution,
       setpieces,
       national,
+      gkDistributionStats,
     },
     reports,
     transferHistory,
