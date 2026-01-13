@@ -28,48 +28,20 @@ const getMonthlyReveneueChart = catchAsync(async (req, res) => {
   });
 });
 
-const getAllPlayersRevenue = catchAsync(async(req, res) => {
-    
-     const filters = pick(req.query, [
-        'searchTerm',
-        'user.firstName',
-        'user.lastName',
-        'user.category',
-        'user.teamName',
-        'user.league',
-      ]);
-    
-    const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
-    const result = await dashboardService.getAllPlayersRevenue(filters, options);
+const totalRevenue = catchAsync(async(req, res) => {
+    const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
+    const filters = pick(req.query, ['searchTerm', 'year', 'paymentType', 'status']);
+    const result = await dashboardService.totalRevenue(filters, options);
 
     sendResponse(res, {
-        statusCode:200,
+        statusCode: 200,
         success: true,
-        message:"Get all player reveneue successfully",
-        data:result
-    });
-})
-
-const getAllTeamReveneue = catchAsync(async(req, res) =>{
-
-    const filters = pick(req.query, [
-       'searchTerm',
-       'team.teamName',
-       'team.coachName',
-       'team.coachEmail',
-      ]);
-    
-    const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
-
-    const result = await dashboardService.getAllTeamReveneue(filters, options);
-
-    sendResponse(res, {
-        statusCode:200,
-        success:true,
-        message:"Get all team reveneue successfully",
+        message: "Get total revenue successfully",
         data: result
     })
-})
+});
+
+
 
 const singleplayerView = catchAsync(async(req, res) => {
 
@@ -125,10 +97,9 @@ const deleteTeamAccount = catchAsync(async(req, res) => {
 export const dashboardController = {
     dashboardOverview,
     getMonthlyReveneueChart,
-    getAllPlayersRevenue,
-    getAllTeamReveneue,
     singleplayerView,
     singleTeamView,
     deletePlayerAccount,
-    deleteTeamAccount
+    deleteTeamAccount,
+    totalRevenue
 };
