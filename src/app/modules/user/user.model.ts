@@ -142,8 +142,7 @@ const userSchema = new Schema<IUser>(
       type: String,
     },
     accessLavel: {
-      type: [String],
-      default: [],
+      type: String,
     },
     lastLogin: {
       type: Date,
@@ -153,9 +152,15 @@ const userSchema = new Schema<IUser>(
     teamName: {
       type: String,
     },
-    teamLocation:{
-      type:String
-    }
+    teamLocation: {
+      type: String,
+    },
+    address: {
+      type: String,
+    },
+    joiningDate: {
+      type: Date,
+    },
   },
   { timestamps: true },
 );

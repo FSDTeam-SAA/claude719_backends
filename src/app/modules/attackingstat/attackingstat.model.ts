@@ -9,6 +9,12 @@ const attackingstatSchema = new mongoose.Schema<IAttackingstat>(
     assists: { type: Number, required: true },
     shotsNsidePr: { type: Number, required: true },
     shotsOutsidePa: { type: Number, required: true },
+    totalShots: { type: Number, required: true },
+    shotsOnTarget: { type: Number, required: true },
+    shootingAccuracy: { type: Number, required: true },
+    shotsOffTarget: { type: Number, required: true },
+    passesAccuracy: { type: Number, required: true },
+    takeOn: { type: Number, required: true },
   },
   { timestamps: true },
 );
