@@ -7,4 +7,10 @@ export interface IAttackingstat {
   assists: number;
   shotsNsidePr: number;
   shotsOutsidePa: number;
+  totalShots: number;
+  shotsOnTarget: number;
+  shootingAccuracy: number;
+  shotsOffTarget: number;
+  passesAccuracy: number;
+  takeOn: number;
 }
