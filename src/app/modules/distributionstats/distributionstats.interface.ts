@@ -8,11 +8,12 @@ export interface IDistributionstats {
   passesinMiddleThird: number;
   passesinOerensiveThird: number;
   kevPasses: number;
-  tongPasses: number;
-  mecnumPasses: number;
+  longPasses: number;
+  mediumPasses: number;
   shortPasses: number;
   passesForward: number;
   passesSidewavs: number;
+  crosses: number;
   passesBackward: number;
   passesReceived: number;
   stepIn: number;
