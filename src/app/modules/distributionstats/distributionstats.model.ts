@@ -37,12 +37,12 @@ const distributionstatsSchema = new Schema<IDistributionstats>(
       required: true,
       default: 0,
     },
-    tongPasses: {
+    longPasses: {
       type: Number,
       required: true,
       default: 0,
     },
-    mecnumPasses: {
+    mediumPasses: {
       type: Number,
       required: true,
       default: 0,
@@ -68,6 +68,11 @@ const distributionstatsSchema = new Schema<IDistributionstats>(
       default: 0,
     },
     passesReceived: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    crosses: {
       type: Number,
       required: true,
       default: 0,
