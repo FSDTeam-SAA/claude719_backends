@@ -16,6 +16,7 @@ import { foulsRouter } from '../modules/fouls/fouls.routes';
 import { playerReportRouter } from '../modules/playerreport/playerreport.routes';
 import { teamRouter } from '../modules/team/team.routes';
 import { dashboardRouter } from '../modules/dashboard/dashboard.routes';
+import { gkDistributionstatsRouter } from '../modules/gkdistributionstats/gkdistributionstats.routes';
 
 const router = Router();
 
@@ -87,6 +88,10 @@ const moduleRoutes = [
   {
     path: '/dashboard',
     route: dashboardRouter,
+  },
+  {
+    path: '/gkdistributionstats',
+    route: gkDistributionstatsRouter,
   },
 ];
 

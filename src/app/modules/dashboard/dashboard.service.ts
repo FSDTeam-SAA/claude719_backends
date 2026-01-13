@@ -9,10 +9,18 @@ import User from '../user/user.model';
 const dashboardOverview = async (userId: string) => {
   const totalPlayers = await User.countDocuments({ role: userRole.player });
   const totalContact = await Contact.countDocuments();
-  const totalGk = await Gkstats.countDocuments();
-  const totalRevenew = await Payment.countDocuments({ status: 'completed' });
+  const totalGk = await User.countDocuments({ role: userRole.gk });
+  const totalRevenew = await Payment.aggregate([
+    { $match: { status: 'completed' } },
+    { $group: { _id: null, totalRevenue: { $sum: '$amount' } } },
+  ]);
 
-  return { totalRevenew, totalPlayers, totalContact, totalGk };
+  return {
+    totalRevenew: totalRevenew[0]?.totalRevenue || 0,
+    totalPlayers,
+    totalContact,
+    totalGk,
+  };
 };
 
 const getMonthlyReveneueChart = async (year: number) => {
@@ -148,9 +156,10 @@ const getAllPlayersRevenue = async (params: any, options: IOption) => {
     },
 
     {
-      $sort: sortBy && sortOrder
-        ? { [sortBy]: sortOrder === 'asc' ? 1 : -1 }
-        : { totalRevenue: -1 },
+      $sort:
+        sortBy && sortOrder
+          ? { [sortBy]: sortOrder === 'asc' ? 1 : -1 }
+          : { totalRevenue: -1 },
     },
 
     {
@@ -271,9 +280,10 @@ const getAllTeamReveneue = async (params: any, options: IOption) => {
     },
 
     {
-      $sort: sortBy && sortOrder
-        ? { [sortBy]: sortOrder === 'asc' ? 1 : -1 }
-        : { totalRevenue: -1 },
+      $sort:
+        sortBy && sortOrder
+          ? { [sortBy]: sortOrder === 'asc' ? 1 : -1 }
+          : { totalRevenue: -1 },
     },
 
     {
@@ -310,47 +320,49 @@ const getAllTeamReveneue = async (params: any, options: IOption) => {
   };
 };
 const singleplayerView = async (playerId: string) => {
-    const player = await User.findById(playerId).select('firstName lastName category teamName league teamLocation email createdAt');
-    if (!player) {
-        throw new Error('Player not found');
-    }
+  const player = await User.findById(playerId).select(
+    'firstName lastName category teamName league teamLocation email createdAt',
+  );
+  if (!player) {
+    throw new Error('Player not found');
+  }
 
-    return player;
+  return player;
 };
 const singleTeamView = async (teamId: string) => {
-    const team = await Team.findById(teamId).select('teamName coachName coachEmail players createdAt');
-    if (!team) {
-        throw new Error('Team not found');
-    }
-    return team;
-}
+  const team = await Team.findById(teamId).select(
+    'teamName coachName coachEmail players createdAt',
+  );
+  if (!team) {
+    throw new Error('Team not found');
+  }
+  return team;
+};
 
 const deletePlayerAccount = async (playerId: string) => {
-    const player = await User.findByIdAndDelete(playerId);
-    if (!player) {
-        throw new Error('Player not found');
-    }
-    return player;
-    
-}
+  const player = await User.findByIdAndDelete(playerId);
+  if (!player) {
+    throw new Error('Player not found');
+  }
+  return player;
+};
 
 const deleteTeamAccount = async (teamId: string) => {
-    
   const team = await Team.findByIdAndDelete(teamId);
-    if (!team) {
-        throw new Error('Team not found');
-    }
+  if (!team) {
+    throw new Error('Team not found');
+  }
 
-    return team;
-}
+  return team;
+};
 
 export const dashboardService = {
-    dashboardOverview,
-    getMonthlyReveneueChart,
-    getAllPlayersRevenue,
-    getAllTeamReveneue,
-    singleplayerView,
-    singleTeamView,
-    deletePlayerAccount,
-    deleteTeamAccount
+  dashboardOverview,
+  getMonthlyReveneueChart,
+  getAllPlayersRevenue,
+  getAllTeamReveneue,
+  singleplayerView,
+  singleTeamView,
+  deletePlayerAccount,
+  deleteTeamAccount,
 };
