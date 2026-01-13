@@ -31,6 +31,67 @@ const distributionstatsSchema = new Schema<IDistributionstats>(
       required: true,
       default: 0,
     },
+
+    kevPasses: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    longPasses: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    mediumPasses: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    shortPasses: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    passesForward: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    passesSidewavs: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    passesBackward: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    passesReceived: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    crosses: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    stepIn: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    turnoverConceded: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    mostPassesPlayerBetween: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
   {
     timestamps: true,

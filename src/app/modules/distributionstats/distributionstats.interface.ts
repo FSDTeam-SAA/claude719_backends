@@ -7,4 +7,16 @@ export interface IDistributionstats {
   passesinFinalThird: number;
   passesinMiddleThird: number;
   passesinOerensiveThird: number;
+  kevPasses: number;
+  longPasses: number;
+  mediumPasses: number;
+  shortPasses: number;
+  passesForward: number;
+  passesSidewavs: number;
+  crosses: number;
+  passesBackward: number;
+  passesReceived: number;
+  stepIn: number;
+  turnoverConceded: number;
+  mostPassesPlayerBetween: number;
 }
