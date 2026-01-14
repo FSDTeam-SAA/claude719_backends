@@ -28,79 +28,97 @@ const getMonthlyReveneueChart = catchAsync(async (req, res) => {
   });
 });
 
-const totalRevenue = catchAsync(async(req, res) => {
-    const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
-    const filters = pick(req.query, ['searchTerm', 'year', 'paymentType', 'status']);
-    const result = await dashboardService.totalRevenue(filters, options);
+// const totalRevenue = catchAsync(async (req, res) => {
+//   const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
+//   const filters = pick(req.query, [
+//     'searchTerm',
+//     'year',
+//     'paymentType',
+//     'status',
+//   ]);
+//   const result = await dashboardService.totalRevenue(filters, options);
 
-    sendResponse(res, {
-        statusCode: 200,
-        success: true,
-        message: "Get total revenue successfully",
-        data: result
-    })
+//   const { meta, data, totalPayments, totalRevenue } = result;
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'Get total revenue successfully',
+//     meta: meta,
+//     data: {
+//       totalRevenue: totalRevenue,
+//       totalPayments: totalPayments,
+//       data: data,
+//     },
+//   });
+// });
+
+const totalRevenue = catchAsync(async (req, res) => {
+  const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
+  const filters = pick(req.query, ['searchTerm', 'paymentType', 'status']);
+  const result = await dashboardService.totalRevenue(filters, options);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Get total revenue successfully',
+    meta: result.meta,
+    data: result.data,
+  });
+});
+
+const singleplayerView = catchAsync(async (req, res) => {
+  const playerId = req.params.id;
+  const result = await dashboardService.singleplayerView(playerId!);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Get single player view successfully',
+    data: result,
+  });
+});
+const singleTeamView = catchAsync(async (req, res) => {
+  const teamId = req.params.id;
+  const result = await dashboardService.singleTeamView(teamId!);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Get single team view successfully',
+    data: result,
+  });
 });
 
 
-
-const singleplayerView = catchAsync(async(req, res) => {
-
-    const playerId = req.params.id;
-    const result = await dashboardService.singleplayerView(playerId!);
-
-    sendResponse(res, {
-        statusCode:200,
-        success:true,
-        message:"Get single player view successfully",
-        data: result
-    })
-})
-const singleTeamView = catchAsync(async(req, res) => {
-
-    const teamId = req.params.id;
-    const result = await dashboardService.singleTeamView(teamId!);
-
-    sendResponse(res, {
-        statusCode:200,
-        success:true,
-        message:"Get single team view successfully",
-        data: result
-    })
-})
-
-const deletePlayerAccount = catchAsync(async(req, res) => {
-
-    const playerId = req.params.id;
+const deletePlayerAccount = catchAsync(async (req, res) => {
     const paymentId = req.params.id;
     const result = await dashboardService.deletePlayerAccount(paymentId!);
-
-    sendResponse(res, {
-        statusCode:200,
-        success:true,
-        message:"Player account deleted successfully",
-        data: result
-    })
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Player account deleted successfully',
+    data: result,
+  });
 });
 
-const deleteTeamAccount = catchAsync(async(req, res) => {
+const deleteTeamAccount = catchAsync(async (req, res) => {
+  const teamId = req.params.id;
+  const result = await dashboardService.deleteTeamAccount(teamId!);
 
-    const teamId = req.params.id;
-    const result = await dashboardService.deleteTeamAccount(teamId!);
-
-    sendResponse(res, {
-        statusCode:200,
-        success:true,
-        message:"Team account deleted successfully",
-        data: result
-    })
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Team account deleted successfully',
+    data: result,
+  });
 });
 
 export const dashboardController = {
-    dashboardOverview,
-    getMonthlyReveneueChart,
-    singleplayerView,
-    singleTeamView,
-    deletePlayerAccount,
-    deleteTeamAccount,
-    totalRevenue
+  dashboardOverview,
+  getMonthlyReveneueChart,
+  singleplayerView,
+  singleTeamView,
+  deletePlayerAccount,
+  deleteTeamAccount,
+  totalRevenue,
 };
