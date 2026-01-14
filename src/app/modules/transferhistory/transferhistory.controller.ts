@@ -73,7 +73,11 @@ const updateTransferhistory = catchAsync(async (req, res) => {
   const fromData = req.body.data ? JSON.parse(req.body.data) : req.body;
   const result = await transferhistoryService.updateTransferhistory(
     id!,
-    req.body,
+    fromData,
+    leftClub,
+    leftCountery,
+    joinedClub,
+    joinedCountery,
   );
   sendResponse(res, {
     statusCode: 200,
