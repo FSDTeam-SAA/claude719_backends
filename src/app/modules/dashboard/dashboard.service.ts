@@ -576,16 +576,16 @@ const singleTeamView = async (teamId: string) => {
   return team;
 };
 
-const deletePlayerAccount = async (playerId: string) => {
-  const player = await User.findByIdAndDelete(playerId);
+const deletePlayerAccount = async (paymentId: string) => {
+  const player = await Payment.findByIdAndDelete(paymentId);
   if (!player) {
     throw new Error('Player not found');
   }
   return player;
 };
 
-const deleteTeamAccount = async (teamId: string) => {
-  const team = await Team.findByIdAndDelete(teamId);
+const deleteTeamAccount = async (paymentId: string) => {
+  const team = await Payment.findByIdAndDelete(paymentId);
   if (!team) {
     throw new Error('Team not found');
   }

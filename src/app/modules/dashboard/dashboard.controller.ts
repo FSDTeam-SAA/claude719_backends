@@ -89,10 +89,10 @@ const singleTeamView = catchAsync(async (req, res) => {
   });
 });
 
-const deletePlayerAccount = catchAsync(async (req, res) => {
-  const playerId = req.params.id;
-  const result = await dashboardService.deletePlayerAccount(playerId!);
 
+const deletePlayerAccount = catchAsync(async (req, res) => {
+    const paymentId = req.params.id;
+    const result = await dashboardService.deletePlayerAccount(paymentId!);
   sendResponse(res, {
     statusCode: 200,
     success: true,
