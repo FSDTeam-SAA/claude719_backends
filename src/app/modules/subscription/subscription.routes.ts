@@ -4,13 +4,33 @@ import auth from '../../middlewares/auth';
 import { userRole } from '../user/user.constant';
 const router = express.Router();
 
-router.post('/', auth(userRole.admin), SubscriptionController.createSubscription);
-router.get('/',  SubscriptionController.getAllSubscription);
+router.post(
+  '/',
+  auth(userRole.admin),
+  SubscriptionController.createSubscription,
+);
+router.get('/', SubscriptionController.getAllSubscription);
 router.get('/:id', SubscriptionController.getSingleSubscription);
-router.put('/:id', auth(userRole.admin), SubscriptionController.updateSubscription);
-router.delete('/:id', auth(userRole.admin), SubscriptionController.deleteSubscription);
-router.post('/activate/:id', auth(userRole.player), SubscriptionController.activeSubscription);
-router.post('/pay/:id', auth(userRole.player), SubscriptionController.paySubscription);
+router.put(
+  '/:id',
+  auth(userRole.admin),
+  SubscriptionController.updateSubscription,
+);
+router.delete(
+  '/:id',
+  auth(userRole.admin),
+  SubscriptionController.deleteSubscription,
+);
+router.post(
+  '/activate/:id',
+  auth(userRole.player),
+  SubscriptionController.activeSubscription,
+);
+// router.post(
+//   '/pay/:id',
+//   auth(userRole.player),
+//   SubscriptionController.paySubscription,
+// );
 
 router.post(
   '/',
@@ -18,10 +38,7 @@ router.post(
   SubscriptionController.createSubscription,
 );
 router.get('/', SubscriptionController.getAllSubscription);
-router.get(
-  '/:id',
-  SubscriptionController.getSingleSubscription,
-);
+router.get('/:id', SubscriptionController.getSingleSubscription);
 router.put(
   '/:id',
   auth(userRole.admin),
