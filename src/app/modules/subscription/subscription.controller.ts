@@ -83,6 +83,7 @@ const activeSubscription = catchAsync(async (req, res) => {
 });
 
 const paySubscription = catchAsync(async (req, res) => {
+  console.log(req.user?.id, req.params.id!)
   const result = await SubscriptionService.paySubscription(
     req.user?.id,
     req.params.id!,
