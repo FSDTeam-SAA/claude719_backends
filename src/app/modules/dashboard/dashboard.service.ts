@@ -156,7 +156,29 @@ const totalRevenue = async (params: any, options: IOption) => {
         pipeline.push({ $match: userFilterConditions });
     }
 
-    // Project the final structure
+    // Handle sorting BEFORE projection
+    const sortOptions: any = {};
+    if (sortBy && sortOrder) {
+        const sortFieldMap: any = {
+            'amount': 'amount',
+            'createdAt': 'createdAt',
+            'firstName': 'userDetails.firstName',
+            'lastName': 'userDetails.lastName',
+            'email': 'userDetails.email',
+            'currentClub': 'userDetails.currentClub',
+            'category': 'userDetails.category',
+            'league': 'userDetails.league',
+            'paymentType': 'paymentType',
+        };
+        const mappedSortField = sortFieldMap[sortBy] || 'createdAt';
+        sortOptions[mappedSortField] = sortOrder === 'asc' ? 1 : -1;
+    } else {
+        sortOptions.createdAt = -1;
+    }
+
+    pipeline.push({ $sort: sortOptions });
+
+    // Project the final structure AFTER sorting
     pipeline.push({
         $project: {
             _id: 0,
@@ -221,28 +243,6 @@ const totalRevenue = async (params: any, options: IOption) => {
             },
         },
     });
-
-    // Handle sorting
-    const sortOptions: any = {};
-    if (sortBy && sortOrder) {
-        const sortFieldMap: any = {
-            'amount': 'amount',
-            'createdAt': 'createdAt',
-            'firstName': 'user.firstName',
-            'lastName': 'user.lastName',
-            'email': 'user.email',
-            'currentClub': 'user.currentClub',
-            'category': 'user.category',
-            'league': 'user.league',
-            'paymentType': 'paymentType',
-        };
-        const mappedSortField = sortFieldMap[sortBy] || 'createdAt';
-        sortOptions[mappedSortField] = sortOrder === 'asc' ? 1 : -1;
-    } else {
-        sortOptions.createdAt = -1;
-    }
-
-    pipeline.push({ $sort: sortOptions });
 
     // Use $facet for pagination and totals
     pipeline.push({
