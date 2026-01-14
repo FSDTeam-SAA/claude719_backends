@@ -124,6 +124,7 @@ const activeSubscription = async (id: string) => {
 };
 
 const paySubscription = async (userId: string, subscriptionId: string) => {
+  console.log('hello world', userId, subscriptionId);
   const user = await User.findById(userId);
   if (!user) throw new AppError(404, 'User not found');
 

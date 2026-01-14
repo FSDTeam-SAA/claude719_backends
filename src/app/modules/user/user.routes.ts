@@ -26,13 +26,13 @@ router.put(
 
 router.put(
   '/video-add',
-  auth(userRole.admin, userRole.player),
+  auth(userRole.admin, userRole.player, userRole.gk),
   fileUploader.upload.array('playingVideo', 5),
   userController.videoAdd,
 );
 router.delete(
   '/video-remove',
-  auth(userRole.admin, userRole.player),
+  auth(userRole.admin, userRole.player, userRole.gk),
   userController.removedVideo,
 );
 
