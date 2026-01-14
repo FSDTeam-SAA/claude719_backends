@@ -70,7 +70,7 @@ const getMonthlyReveneueChart = async (year: number) => {
 
   return result;
 };
-
+//check code for totalRevenue with pagination, filtering, and sorting
 const totalRevenue = async (params: any, options: IOption) => {
     const { page, limit, skip, sortBy, sortOrder } = pagination(options);
     const { searchTerm, year, paymentType, ...filterData } = params;
