@@ -28,34 +28,34 @@ const getMonthlyReveneueChart = catchAsync(async (req, res) => {
   });
 });
 
-// const totalRevenue = catchAsync(async (req, res) => {
-//   const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
-//   const filters = pick(req.query, [
-//     'searchTerm',
-//     'year',
-//     'paymentType',
-//     'status',
-//   ]);
-//   const result = await dashboardService.totalRevenue(filters, options);
-
-//   const { meta, data, totalPayments, totalRevenue } = result;
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'Get total revenue successfully',
-//     meta: meta,
-//     data: {
-//       totalRevenue: totalRevenue,
-//       totalPayments: totalPayments,
-//       data: data,
-//     },
-//   });
-// });
-
 const totalRevenue = catchAsync(async (req, res) => {
   const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
-  const filters = pick(req.query, ['searchTerm', 'paymentType', 'status']);
+  const filters = pick(req.query, [
+    'searchTerm',
+    'year',
+    'paymentType',
+    'status',
+  ]);
   const result = await dashboardService.totalRevenue(filters, options);
+
+  const { meta, data, totalPayments, totalRevenue } = result;
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Get total revenue successfully',
+    meta: meta,
+    data: {
+      totalRevenue: totalRevenue,
+      totalPayments: totalPayments,
+      data: data,
+    },
+  });
+});
+
+const totalRevenueUser = catchAsync(async (req, res) => {
+  const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
+  const filters = pick(req.query, ['searchTerm', 'paymentType', 'status']);
+  const result = await dashboardService.totalRevenueUser(filters, options);
 
   sendResponse(res, {
     statusCode: 200,
@@ -89,10 +89,9 @@ const singleTeamView = catchAsync(async (req, res) => {
   });
 });
 
-
 const deletePlayerAccount = catchAsync(async (req, res) => {
-    const paymentId = req.params.id;
-    const result = await dashboardService.deletePlayerAccount(paymentId!);
+  const paymentId = req.params.id;
+  const result = await dashboardService.deletePlayerAccount(paymentId!);
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -121,4 +120,5 @@ export const dashboardController = {
   deletePlayerAccount,
   deleteTeamAccount,
   totalRevenue,
+  totalRevenueUser,
 };
