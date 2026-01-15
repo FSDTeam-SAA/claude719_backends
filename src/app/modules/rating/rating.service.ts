@@ -9,29 +9,43 @@ const createRating = async (userId: string, payload: IRating) => {
   const user = await User.findById(userId);
   if (!user) throw new AppError(404, 'User not found');
 
-  if (user.role === userRole.player) {
-    const result = await Rating.create({
-      ...payload,
-      player: user._id,
-    });
-    return result;
-  }
-  if (user.role === userRole.gk) {
-    const result = await Rating.create({
-      ...payload,
-      gk: user._id,
-    });
-
-    if (user.isSubscription) {
-      if (user.numberOfGame > 0) {
-        user.numberOfGame = user.numberOfGame - 1;
-        await user.save();
-      } else {
-        throw new AppError(400, 'You have no game left');
-      }
+  // subscription check
+  if (user.isSubscription && user.team) {
+    if (user.numberOfGame > 0) {
+      user.numberOfGame -= 1;
+      await user.save();
+    } else {
+      user.isSubscription = false;
+      await user.save();
+      throw new AppError(400, 'You have no game left');
     }
-    return result;
   }
+
+  let filter: any = {};
+  let owner: any = {};
+
+  if (user.role === userRole.player) {
+    filter.player = user._id;
+    owner.player = user._id;
+  } else if (user.role === userRole.gk) {
+    filter.gk = user._id;
+    owner.gk = user._id;
+  } else {
+    throw new AppError(400, 'Invalid role');
+  }
+
+  const lastRating = await Rating.findOne(filter).sort({ createdAt: -1 });
+
+  const previousGames = lastRating?.gamesNumber || 0;
+
+
+  const newRating = await Rating.create({
+    ...payload,
+    ...owner,
+    gamesNumber: previousGames + 1,
+  });
+
+  return newRating;
 };
 
 const getAllRating = async (userId: string, options: IOption) => {
