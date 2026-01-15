@@ -15,6 +15,8 @@ export interface ITeam {
 
   coachName?: string;
   coachEmail: string;
+  category?: string;
+  league?: string;
 
   players: ITeamPlayer[];
 

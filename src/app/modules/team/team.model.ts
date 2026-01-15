@@ -12,6 +12,12 @@ const TeamSchema = new mongoose.Schema<ITeam>(
       type: String,
       require: true,
     },
+    category: {
+      type: String,
+    },
+    league: {
+      type: String,
+    },
     players: [
       {
         user: {
