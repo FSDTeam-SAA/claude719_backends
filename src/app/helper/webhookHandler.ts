@@ -94,6 +94,8 @@ const webHookHandlers = async (req: Request, res: Response) => {
               lastName: '',
               email: player.email,
               role: player.role,
+              category: team.category,
+              league: team.league,
               password,
               isSubscription: true,
               subscription: subscription._id,
