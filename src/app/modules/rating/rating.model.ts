@@ -14,11 +14,14 @@ const ratingSchema = new mongoose.Schema<IRating>(
     rating: {
       type: Number,
     },
-    position: [{
-      type: String,
-    }],
-    numberOfGames: {
+    position: [
+      {
+        type: String,
+      },
+    ],
+    gamesNumber: {
       type: Number,
+      default: 0,
     },
     minutes: {
       type: Number,

@@ -5,6 +5,6 @@ export interface IRating {
   gk?: Types.ObjectId;
   rating?: number;
   position?: string[];
-  numberOfGames?: number;
+  gamesNumber?: number;
   minutes?: number;
 }
