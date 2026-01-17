@@ -38,7 +38,6 @@ const createRating = async (userId: string, payload: IRating) => {
 
   const previousGames = lastRating?.gamesNumber || 0;
 
-
   const newRating = await Rating.create({
     ...payload,
     ...owner,
@@ -96,19 +95,6 @@ const updateRating = async (id: string, payload: IRating) => {
     .populate('gk', '-password');
   if (!result) throw new AppError(404, 'Rating not found');
 
-  if (result) {
-    const user = await User.findById(result.gk || result.player);
-    if (user) {
-      if (user.isSubscription) {
-        if (user.numberOfGame > 0) {
-          user.numberOfGame = user.numberOfGame - 1;
-          await user.save();
-        } else {
-          throw new AppError(400, 'You have no game left');
-        }
-      }
-    }
-  }
   return result;
 };
 const deleteRating = async (id: string) => {
