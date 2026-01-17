@@ -318,7 +318,8 @@ const totalRevenueUser = async (params: any, options: IOption) => {
     .skip(skip)
     .limit(limit)
     .sort({ [sortBy]: sortOrder } as any)
-    .populate('user', '-password');
+    .populate('user', '-password')
+    .populate('team');
 
   if (!result) {
     throw new AppError(404, 'Payment not found');
