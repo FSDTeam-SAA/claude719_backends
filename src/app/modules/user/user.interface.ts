@@ -19,6 +19,7 @@ export interface IUser {
   hight?: string;
   weight?: string;
   dob?: string;
+  age?: number;
   birthdayPlace?: string;
   citizenship?: string;
   currentClub?: string;
@@ -49,7 +50,7 @@ export interface IUser {
   numberOfGame: number;
   team: Types.ObjectId;
   teamName?: string;
-  teamLocation?:string;
+  teamLocation?: string;
   jerseyNumber?: string;
   createdAt: Date;
   updatedAt: Date;
