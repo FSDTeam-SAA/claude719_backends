@@ -115,6 +115,7 @@ const updateMyProfile = catchAsync(async (req, res) => {
     profileImage?: Express.Multer.File[];
     playingVideo?: Express.Multer.File[];
   };
+  // console.log(req.body);
   const profileImageFile = files?.profileImage?.[0];
   const videoFiles = files?.playingVideo;
   const fromData = req.body.data ? JSON.parse(req.body.data) : req.body;
