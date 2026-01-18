@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { IUser } from './user.interface';
 import bcrypt from 'bcryptjs';
+import { calculateAge } from '../../helper/calculateAge';
 
 const userSchema = new Schema<IUser>(
   {
@@ -169,8 +170,32 @@ const userSchema = new Schema<IUser>(
 );
 
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+
+  if (this.isModified('dob') && this.dob) {
+    this.age = calculateAge(this.dob);
+  }
+  next();
+});
+
+userSchema.pre('findOneAndUpdate', function (next) {
+  const update = this.getUpdate() as any;
+
+  // support both { dob } and { $set: { dob } }
+  const dob = update?.dob || update?.$set?.dob;
+
+  if (dob) {
+    const age = calculateAge(dob);
+
+    if (update.$set) {
+      update.$set.age = age;
+    } else {
+      update.age = age;
+    }
+  }
+
   next();
 });
 
