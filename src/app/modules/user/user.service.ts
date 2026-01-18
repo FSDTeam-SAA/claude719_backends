@@ -334,6 +334,7 @@ const unfollowUser = async (userId: string, targetUserId: string) => {
   return { message: 'User unfollowed successfully' };
 };
 
+const similerPlayers = async (params: any, options: IOption) => {};
 export const userService = {
   createUser,
   getAllUser,
