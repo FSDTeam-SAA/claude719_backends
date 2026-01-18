@@ -312,6 +312,8 @@ const totalRevenueUser = async (params: any, options: IOption) => {
     });
   }
 
+  andCondition.push({ status: 'completed' });
+
   const whereCondition = andCondition.length > 0 ? { $and: andCondition } : {};
 
   const result = await Payment.find(whereCondition)
