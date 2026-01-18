@@ -54,4 +54,6 @@ export interface IUser {
   jerseyNumber?: string;
   createdAt: Date;
   updatedAt: Date;
+  followers?: Types.ObjectId[];
+  following?: Types.ObjectId[];
 }
