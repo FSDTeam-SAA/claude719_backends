@@ -210,7 +210,7 @@ const profile = async (id: string) => {
       setpieces,
       national,
       gkDistributionStats,
-      attackingstat
+      attackingstat,
     },
     reports,
     transferHistory,
@@ -294,6 +294,46 @@ const removedVideo = async (id: string, videoUrls: string[]) => {
   return result;
 };
 
+const followUser = async (userId: string, targetUserId: string) => {
+  const user = await User.findById(userId);
+  if (!user) throw new AppError(404, 'User not found');
+  const targetUser = await User.findById(targetUserId);
+  if (!targetUser) throw new AppError(404, 'Target user not found');
+
+  if (user._id === targetUser._id) {
+    throw new AppError(400, 'You cannot follow yourself');
+  }
+
+  // target user update (followers)
+  await User.findByIdAndUpdate(targetUserId, {
+    $addToSet: { followers: userId },
+  });
+
+  // current user update (following)
+  await User.findByIdAndUpdate(userId, {
+    $addToSet: { following: targetUserId },
+  });
+
+  return { message: 'User followed successfully' };
+};
+
+const unfollowUser = async (userId: string, targetUserId: string) => {
+  const user = await User.findById(userId);
+  if (!user) throw new AppError(404, 'User not found');
+  const targetUser = await User.findById(targetUserId);
+  if (!targetUser) throw new AppError(404, 'Target user not found');
+
+  await User.findByIdAndUpdate(targetUserId, {
+    $pull: { followers: userId },
+  });
+
+  await User.findByIdAndUpdate(userId, {
+    $pull: { following: targetUserId },
+  });
+
+  return { message: 'User unfollowed successfully' };
+};
+
 export const userService = {
   createUser,
   getAllUser,
@@ -305,4 +345,6 @@ export const userService = {
   videoAdd,
   removedVideo,
   getSingleUserDetails,
+  followUser,
+  unfollowUser,
 };
