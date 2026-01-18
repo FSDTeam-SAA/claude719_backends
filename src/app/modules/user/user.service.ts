@@ -1,6 +1,7 @@
 import AppError from '../../error/appError';
 import { fileUploader } from '../../helper/fileUploder';
 import pagination, { IOption } from '../../helper/pagenation';
+import Attackingstat from '../attackingstat/attackingstat.model';
 import Defensive from '../defensive/defensive.model';
 import Distributionstats from '../distributionstats/distributionstats.model';
 import Fouls from '../fouls/fouls.model';
@@ -105,6 +106,7 @@ const getSingleUserDetails = async (id: string) => {
     user,
     rating: await Rating.find(matchField),
     gkstats: await Gkstats.find(matchField),
+    attacking: await Attackingstat.find(matchField),
     fouls: await Fouls.find(matchField),
     defensive: await Defensive.find(matchField),
     distribution: await Distributionstats.find(matchField),
@@ -182,6 +184,7 @@ const profile = async (id: string) => {
     reports,
     transferHistory,
     gkDistributionStats,
+    attackingstat,
   ] = await Promise.all([
     Rating.find(matchField),
     Gkstats.find(matchField),
@@ -193,6 +196,7 @@ const profile = async (id: string) => {
     PlayerReport.find(matchField),
     TransferHistory.find(matchField),
     GkDistributionStats.find(matchField),
+    Attackingstat.find(matchField),
   ]);
 
   return {
@@ -206,6 +210,7 @@ const profile = async (id: string) => {
       setpieces,
       national,
       gkDistributionStats,
+      attackingstat
     },
     reports,
     transferHistory,
