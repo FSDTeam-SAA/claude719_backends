@@ -25,6 +25,9 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: true,
     },
+    age: {
+      type: Number,
+    },
     role: {
       type: String,
       enum: ['player', 'admin', 'gk', 'coach'],
