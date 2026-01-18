@@ -103,10 +103,45 @@ const deleteRating = async (id: string) => {
   return result;
 };
 
+const getAverageRatingByUser = async (userId: string) => {
+  const ratings = await Rating.find({
+    $or: [{ player: userId }, { gk: userId }],
+  });
+
+  if (!ratings.length) {
+    return {
+      averageRating: 0,
+      gamesNumber: 0,
+      stars: 0,
+    };
+  }
+
+  const totalRating = ratings.reduce(
+    (sum, item) => sum + (item.rating || 0),
+    0,
+  );
+
+  const totalGames = ratings.reduce(
+    (sum, item) => sum + (item.gamesNumber || 0),
+    0,
+  );
+
+  const averageRating = totalGames > 0 ? totalRating / totalGames : 0;
+
+  const stars = Math.round((averageRating / 10) * 5);
+
+  return {
+    averageRating: Number(averageRating.toFixed(1)),
+    gamesNumber: totalGames,
+    stars,
+  };
+};
+
 export const ratingService = {
   createRating,
   getAllRating,
   getSingleRating,
   updateRating,
   deleteRating,
+  getAverageRatingByUser,
 };
