@@ -102,11 +102,12 @@ const userSchema = new Schema<IUser>(
     agent: {
       type: String,
     },
-    socialMedia: {
-      type: [String],
-      default: [],
-    },
-
+    socialMedia: [
+      {
+        name: String,
+        url: String,
+      },
+    ],
     inSchoolOrCollege: {
       type: Boolean,
     },
