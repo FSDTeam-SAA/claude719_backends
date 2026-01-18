@@ -28,7 +28,10 @@ export interface IUser {
   foot?: string;
   position?: string[];
   agent?: string;
-  socialMedia?: string[];
+  socialMedia?: {
+    name: string;
+    url: string;
+  }[];
   inSchoolOrCollege: boolean; // Yes / No
   institute?: string;
   gpa?: string;
