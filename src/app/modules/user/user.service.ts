@@ -9,6 +9,7 @@ import Gkstats from '../gkstats/gkstats.model';
 import National from '../national/national.model';
 import PlayerReport from '../playerreport/playerreport.model';
 import Rating from '../rating/rating.model';
+import { ratingService } from '../rating/rating.service';
 import Setpieces from '../setpieces/setpieces.model';
 import TransferHistory from '../transferhistory/transferhistory.model';
 import { userRole } from './user.constant';
@@ -98,6 +99,7 @@ const getSingleUserDetails = async (id: string) => {
   }
 
   const matchField = user.role === userRole.gk ? { gk: id } : { player: id };
+  const avararageRatting = await ratingService.getAverageRatingByUser(id);
 
   return {
     user,
@@ -111,6 +113,7 @@ const getSingleUserDetails = async (id: string) => {
     reports: await PlayerReport.find(matchField),
     transferHistory: await TransferHistory.find(matchField),
     gkDistributionStats: await GkDistributionStats.find(matchField),
+    avarageRatting: avararageRatting,
   };
 };
 
@@ -167,7 +170,7 @@ const profile = async (id: string) => {
   }
 
   const matchField = user.role === userRole.gk ? { gk: id } : { player: id };
-
+  const avararageRatting = await ratingService.getAverageRatingByUser(id);
   const [
     rating,
     gkstats,
@@ -206,6 +209,7 @@ const profile = async (id: string) => {
     },
     reports,
     transferHistory,
+    avararageRatting,
   };
 };
 
