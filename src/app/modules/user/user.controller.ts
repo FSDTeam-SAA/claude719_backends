@@ -155,6 +155,28 @@ const removedVideo = catchAsync(async (req, res) => {
   });
 });
 
+const followUser = catchAsync(async (req, res) => {
+  const { targetUserId } = req.params;
+  const result = await userService.followUser(req.user.id, targetUserId!);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User followed successfully',
+    data: result,
+  });
+});
+
+const unfollowUser = catchAsync(async (req, res) => {
+  const { targetUserId } = req.params;
+  const result = await userService.unfollowUser(req.user.id, targetUserId!);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User unfollowed successfully',
+    data: result,
+  });
+});
+
 export const userController = {
   createUser,
   getAllUser,
@@ -166,4 +188,6 @@ export const userController = {
   updateMyProfile,
   videoAdd,
   removedVideo,
+  followUser,
+  unfollowUser,
 };

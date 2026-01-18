@@ -36,14 +36,33 @@ router.delete(
   userController.removedVideo,
 );
 
-router.get(
-  '/all-user',
-  userController.getAllUser,
-);
+router.get('/all-user', userController.getAllUser);
 router.get(
   '/detail/:id',
   // auth(userRole.admin),
   userController.getSingleUserDetails,
+);
+router.put(
+  '/follow/:targetUserId',
+  auth(
+    userRole.coach,
+    userRole.gk,
+    userRole.player,
+    userRole.admin,
+    userRole.user,
+  ),
+  userController.followUser,
+);
+router.delete(
+  '/unfollow/:targetUserId',
+  auth(
+    userRole.coach,
+    userRole.gk,
+    userRole.player,
+    userRole.admin,
+    userRole.user,
+  ),
+  userController.unfollowUser,
 );
 router.get('/:id', userController.getUserById);
 router.put(
