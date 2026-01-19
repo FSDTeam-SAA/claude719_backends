@@ -19,4 +19,6 @@ export interface IDistributionstats {
   stepIn: number;
   turnoverConceded: number;
   mostPassesPlayerBetween: number;
+  passTheMost?: string;
+  ballTheMost?: string;
 }

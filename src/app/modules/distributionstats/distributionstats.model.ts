@@ -92,6 +92,13 @@ const distributionstatsSchema = new Schema<IDistributionstats>(
       required: true,
       default: 0,
     },
+
+    passTheMost: {
+      type: String,
+    },
+    ballTheMost: {
+      type: String,
+    },
   },
   {
     timestamps: true,
