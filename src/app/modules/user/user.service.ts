@@ -1,3 +1,4 @@
+// Remove the path normalize import as it's not needed for mathematical operations
 import AppError from '../../error/appError';
 import { fileUploader } from '../../helper/fileUploder';
 import pagination, { IOption } from '../../helper/pagenation';
@@ -100,8 +101,8 @@ const getSingleUserDetails = async (id: string) => {
   }
 
   const matchField = user.role === userRole.gk ? { gk: id } : { player: id };
-  const avararageRatting = await ratingService.getAverageRatingByUser(id);
-  const semelierPlayer = await similerPlayers(id);
+  const averageRatingData = await ratingService.getAverageRatingByUser(id);
+  const semelierPlayer = await similerPlayersAndGK(id);
 
   return {
     user,
@@ -116,7 +117,7 @@ const getSingleUserDetails = async (id: string) => {
     reports: await PlayerReport.find(matchField),
     transferHistory: await TransferHistory.find(matchField),
     gkDistributionStats: await GkDistributionStats.find(matchField),
-    avarageRatting: avararageRatting,
+    avarageRatting: averageRatingData,
     semelierPlayer,
   };
 };
@@ -174,8 +175,8 @@ const profile = async (id: string) => {
   }
 
   const matchField = user.role === userRole.gk ? { gk: id } : { player: id };
-  const avararageRatting = await ratingService.getAverageRatingByUser(id);
-  const semelierPlayer = await similerPlayers(id);
+  const averageRatingData = await ratingService.getAverageRatingByUser(id);
+  const semelierPlayer = await similerPlayersAndGK(id);
   const [
     rating,
     gkstats,
@@ -217,7 +218,7 @@ const profile = async (id: string) => {
     },
     reports,
     transferHistory,
-    avararageRatting,
+    avararageRatting: averageRatingData,
     semelierPlayer,
   };
 };
@@ -338,115 +339,137 @@ const unfollowUser = async (userId: string, targetUserId: string) => {
   return { message: 'User unfollowed successfully' };
 };
 
-const similerPlayers = async (userId: string) => {
+
+
+const similerPlayersAndGK = async (userId: string) => {
   const baseUser = await User.findById(userId);
   if (!baseUser) return [];
 
-  const baseMatch =
-    baseUser.role === 'gk'
-      ? { gk: userId }
-      : { player: userId };
+  const isGK = baseUser.role === 'gk';
 
-  const baseStats =
-    baseUser.role === 'gk'
-      ? await Gkstats.findOne(baseMatch)
-      : await Attackingstat.findOne(baseMatch);
+  const baseMatch = isGK ? { gk: baseUser._id } : { player: baseUser._id };
 
-  const baseRating = await Rating.findOne(baseMatch);
-  if (!baseStats || !baseRating) return [];
+  // Base rating (avg rating + gamesNumber)
+  const baseRating = await ratingService.getAverageRatingByUser(userId);
 
-  // Only same role (player ↔ player, gk ↔ gk)
+  // Base stats
+  const baseStats = isGK
+    ? await Gkstats.findOne(baseMatch)
+    : await Attackingstat.findOne(baseMatch);
+
+  if (!baseStats) return [];
+
+  // Only same role candidates
   const candidates = await User.find({
     _id: { $ne: userId },
-    role: baseUser.role,
-    ...(baseUser.role !== 'gk' && {
-      position: { $in: baseUser.position },
-    }),
+    role: baseUser.role, // GK ↔ GK | Player ↔ Player
   });
 
-  const MAX_GOAL_DIFF = 30;
-  const MAX_RATING_DIFF = 10;
-  const MAX_JERSEY_DIFF = 99;
-
-  const WEIGHT = {
-    team: 20,
-    goals: 40,
-    rating: 30,
-    jersey: 10,
-  }; // total = 100
-
-  const result = [];
+  const result: any[] = [];
 
   for (const user of candidates) {
-    const userMatch =
-      baseUser.role === 'gk'
-        ? { gk: user._id }
-        : { player: user._id };
+    const match = isGK ? { gk: user._id } : { player: user._id };
 
-    const stats =
-      baseUser.role === 'gk'
-        ? await Gkstats.findOne(userMatch)
-        : await Attackingstat.findOne(userMatch);
+    const stats = isGK
+      ? await Gkstats.findOne(match)
+      : await Attackingstat.findOne(match);
 
-    const rating = await Rating.findOne(userMatch);
-    if (!stats || !rating) continue;
+    if (!stats) continue;
 
-    let score = 0;
+    const rating = await ratingService.getAverageRatingByUser(
+      user._id.toString(),
+    );
 
-    // Same Team
-    if (baseUser.team === user.team) {
-      score += WEIGHT.team;
+    const national = await National.findOne(match);
+    const transfer = await TransferHistory.findOne(match).sort({
+      createdAt: -1,
+    });
+
+    /* ---------------- SIMILARITY ---------------- */
+    let similarity = 0;
+
+    // Position (GK always match)
+    if (isGK || baseUser.position?.some((p) => user.position?.includes(p))) {
+      similarity += 25;
     }
 
-    // Goals similarity
-    const baseGoals =
-      baseUser.role === 'gk'
-        ? (baseStats as any).goalsConceded ?? 0
-        : (baseStats as any).goals ?? 0;
-
-    const userGoals =
-      baseUser.role === 'gk'
-        ? (stats as any).goalsConceded ?? 0
-        : (stats as any).goals ?? 0;
-
-    const goalDiff = Math.abs(baseGoals - userGoals);
-    score +=
-      Math.max(0, 1 - goalDiff / MAX_GOAL_DIFF) *
-      WEIGHT.goals;
+    // Age similarity
+    similarity +=
+      Math.max(0, 1 - Math.abs((baseUser.age || 0) - (user.age || 0)) / 10) *
+      20;
 
     // Rating similarity
-    const ratingDiff = Math.abs(
-      (baseRating.rating || 0) - (rating.rating || 0),
-    );
-    score +=
-      Math.max(0, 1 - ratingDiff / MAX_RATING_DIFF) *
-      WEIGHT.rating;
+    similarity +=
+      Math.max(
+        0,
+        1 -
+          Math.abs(
+            (baseRating.averageRating || 0) - (rating.averageRating || 0),
+          ) /
+            10,
+      ) * 30;
 
-    // Jersey similarity
-    const jerseyDiff = Math.abs(
-      Number(baseUser.jerseyNumber || 0) -
-        Number(user.jerseyNumber || 0),
-    );
-    score +=
-      Math.max(0, 1 - jerseyDiff / MAX_JERSEY_DIFF) *
-      WEIGHT.jersey;
+    // Game similarity (gamesNumber)
+    similarity +=
+      Math.max(
+        0,
+        1 -
+          Math.abs((baseRating.gamesNumber || 0) - (rating.gamesNumber || 0)) /
+            50,
+      ) * 25;
 
-    const similarity = Math.round(score);
+    similarity = Math.round(similarity);
+    if (similarity < 40) continue;
 
-    // 0% বাদ
-    if (similarity < 1) continue;
-
+    /* ---------------- FINAL OUTPUT ---------------- */
     result.push({
-      user,
+      _id: user._id,
+      name: `${user.firstName} ${user.lastName}`,
+      profileImage: user.profileImage,
+      age: user.age,
+      position: user.position,
+      teamName: user.teamName,
+
+      game: rating.gamesNumber || 0, // gamesNumber = game
+      avgRating: rating.averageRating || 0,
       similarity,
+
+      // Player specific
+      ...(user.role === 'player' && {
+        goals: (stats as any).goals,
+        assists: (stats as any).assists,
+      }),
+
+      // GK specific
+      ...(user.role === 'gk' && {
+        saves: (stats as any).saves,
+        goalsConceded: (stats as any).goalsConceded,
+      }),
+
+      // National team
+      nationalTeam: national
+        ? {
+            teamName: national.teamName,
+            match: national.match,
+            goals: national.goals,
+            flag: national.flag,
+          }
+        : null,
+
+      // Latest transfer
+      lastTransfer: transfer
+        ? {
+            season: transfer.season,
+            leftClub: transfer.leftClubName,
+            joinedClub: transfer.joinedclubName,
+            joinedClubCountery: transfer.joinedCountery,
+          }
+        : null,
     });
   }
 
-  return result
-    .sort((a, b) => b.similarity - a.similarity)
-    .slice(0, 6);
+  return result.sort((a, b) => b.similarity - a.similarity).slice(0, 6);
 };
-
 
 export const userService = {
   createUser,
