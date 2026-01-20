@@ -61,6 +61,7 @@ const userSchema = new Schema<IUser>(
     jerseyNumber: {
       type: String,
     },
+    schoolName: { type: String },
 
     // user profile
     gender: {
