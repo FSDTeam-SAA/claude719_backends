@@ -425,7 +425,7 @@ const similerPlayersAndGK = async (userId: string) => {
       name: `${user.firstName} ${user.lastName}`,
       profileImage: user.profileImage,
       age: user.age,
-      nationality: user.nationality || "",
+      nationality: user.nationality || null,
       position: user.position,
       teamName: user.teamName,
 
