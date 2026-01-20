@@ -45,6 +45,9 @@ const userSchema = new Schema<IUser>(
     phone: {
       type: String,
     },
+    phoneCode: {
+      type: String,
+    },
     otp: {
       type: String,
     },
