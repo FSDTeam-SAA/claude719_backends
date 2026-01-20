@@ -38,6 +38,7 @@ export interface IUser {
   playingVideo?: string[];
   address?: string;
   joiningDate?: Date;
+  schoolName?: string;
   // designation?: string;
 
   isSubscription?: boolean;

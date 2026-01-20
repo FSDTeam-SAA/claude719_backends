@@ -14,8 +14,8 @@ const registerUser = async (payload: Partial<IUser>) => {
   const exist = await User.findOne({ email: payload.email });
   if (exist) throw new AppError(400, 'User already exists');
 
-  const idx = Math.floor(Math.random() * 100);
-  payload.profileImage = `https://avatar.iran.liara.run/public/${idx}.png`;
+  // const idx = Math.floor(Math.random() * 100);
+  // payload.profileImage = `https://avatar.iran.liara.run/public/${idx}.png`;
 
   payload.provider = 'credentials';
   const user = await User.create(payload);
