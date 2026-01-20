@@ -142,6 +142,9 @@ const userSchema = new Schema<IUser>(
     subscriptionExpiry: {
       type: Date,
     },
+    nationality: {
+      type: String,
+    },
 
     // admin profile
     designation: {

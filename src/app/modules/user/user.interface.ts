@@ -40,6 +40,7 @@ export interface IUser {
   joiningDate?: Date;
   schoolName?: string;
   // designation?: string;
+  nationality?:string;
 
   isSubscription?: boolean;
   subscription?: Types.ObjectId;
