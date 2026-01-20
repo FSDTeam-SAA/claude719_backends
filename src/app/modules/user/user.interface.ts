@@ -8,6 +8,7 @@ export interface IUser {
   role: 'player' | 'admin' | 'gk';
   profileImage?: string;
   phone?: string;
+  phoneCode?: string;
   otp?: string;
   otpExpiry?: Date;
   verified?: boolean;
