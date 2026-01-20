@@ -339,8 +339,6 @@ const unfollowUser = async (userId: string, targetUserId: string) => {
   return { message: 'User unfollowed successfully' };
 };
 
-
-
 const similerPlayersAndGK = async (userId: string) => {
   const baseUser = await User.findById(userId);
   if (!baseUser) return [];
@@ -427,6 +425,7 @@ const similerPlayersAndGK = async (userId: string) => {
       name: `${user.firstName} ${user.lastName}`,
       profileImage: user.profileImage,
       age: user.age,
+      nationality: user.nationality || "",
       position: user.position,
       teamName: user.teamName,
 
