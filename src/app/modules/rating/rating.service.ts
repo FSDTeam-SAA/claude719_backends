@@ -103,6 +103,15 @@ const deleteRating = async (id: string) => {
   return result;
 };
 
+const calculateStars = (rating: number): number => {
+  if (rating >= 8.8) return 5;
+  if (rating >= 8) return 4;
+  if (rating >= 5) return 3;
+  if (rating >= 3) return 2;
+  if (rating > 0) return 1;
+  return 0;
+};
+
 const getAverageRatingByUser = async (userId: string) => {
   const ratings = await Rating.find({
     $or: [{ player: userId }, { gk: userId }],
@@ -128,7 +137,7 @@ const getAverageRatingByUser = async (userId: string) => {
 
   const averageRating = totalGames > 0 ? totalRating / totalGames : 0;
 
-  const stars = Math.round((averageRating / 10) * 5);
+  const stars = calculateStars(averageRating);
 
   return {
     averageRating: Number(averageRating.toFixed(1)),
