@@ -2,6 +2,7 @@ import config from '../../config';
 import AppError from '../../error/appError';
 import catchAsync from '../../utils/catchAsycn';
 import sendResponse from '../../utils/sendResponse';
+import User from '../user/user.model';
 import { authService } from './auth.service';
 
 const registerUser = catchAsync(async (req, res) => {
@@ -57,6 +58,47 @@ const googleLogin = catchAsync(async (req, res) => {
     data: {
       accessToken: result.accessToken,
       user: result.user,
+    },
+  });
+});
+
+// const checkUserExists = catchAsync(async (req, res) => {
+//   const { email } = req.query;
+
+//   if (!email) {
+//     throw new AppError(400, 'Email is required');
+//   }
+
+//   const user = await User.findOne({ email: email.toString() });
+
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'User check completed',
+//     data: {
+//       exists: !!user,
+//       role: user?.role || null,
+//     },
+//   });
+// });
+
+const checkUserExists = catchAsync(async (req, res) => {
+  const { email } = req.query;
+
+  if (!email) {
+    throw new AppError(400, 'Email is required');
+  }
+
+  const user = await User.findOne({ email: email.toString() });
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User check completed',
+    data: {
+      exists: !!user,
+      role: user?.role || null,
+      provider: user?.provider || null,
     },
   });
 });
@@ -155,4 +197,5 @@ export const authController = {
   logoutUser,
   changePassword,
   googleLogin,
+  checkUserExists
 };
