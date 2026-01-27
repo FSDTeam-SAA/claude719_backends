@@ -54,53 +54,155 @@ const loginUser = async (payload: Partial<IUser>) => {
   return { accessToken, refreshToken, user: userWithoutPassword };
 };
 
+
 const googleLogin = async (idToken: string, role?: string) => {
-  const payload = await jwtHelpers.verifyGoogleToken(idToken);
+  try {
+    console.log("=== GOOGLE LOGIN BACKEND START ===");
+    console.log("Received role parameter:", role);
+    
+    const payload = await jwtHelpers.verifyGoogleToken(idToken);
 
-  const email = payload.email!;
-  const firstName = payload.given_name || payload.name || 'Google';
-  const lastName = payload.family_name || '';
-  const profileImage = payload.picture;
+    const email = payload.email!;
+    const firstName = payload.given_name || payload.name || 'Google User';
+    const lastName = payload.family_name || '';
+    const profileImage = payload.picture;
 
-  let user = await User.findOne({ email });
+    console.log("User email:", email);
 
-  if (!user) {
-    user = await User.create({
-      firstName,
-      lastName,
-      email,
-      password: 'GOOGLE_AUTH', // dummy password
-      role: role || 'player', // default role
-      provider: 'google',
-      verified: true,
-      profileImage,
-    });
+    // Check if user exists
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // ✅ NEW USER - Create with the provided role
+      console.log("🔍 User NOT found in database. Creating new user...");
+      
+      // Use provided role, default to 'player' if not provided
+      const validRoles = ['player', 'admin', 'gk'];
+      const userRole = (role && validRoles.includes(role) ? role : 'player') as 'player' | 'admin' | 'gk';
+      
+      console.log("🎯 Creating user with role:", userRole);
+      
+      user = await User.create({
+        firstName,
+        lastName,
+        email,
+        password: 'GOOGLE_AUTH_' + Math.random().toString(36).slice(2),
+        role: userRole, // ✅ This is the critical line - using provided role
+        provider: 'google',
+        verified: true,
+        profileImage,
+      });
+      
+      console.log("✅ New user created successfully!");
+      console.log("📋 User details:", {
+        email: user.email,
+        role: user.role,
+        id: user._id
+      });
+      
+    } else {
+      // ✅ EXISTING USER - Keep existing role
+      console.log("🔍 User exists in database");
+      console.log("📋 Existing user details:", {
+        email: user.email,
+        currentRole: user.role,
+        provider: user.provider
+      });
+      
+      // Only update role if it's a Google user and role is different
+      // This prevents changing role for existing email/password users
+      const validRoles = ['player', 'admin', 'gk'];
+      if (user.provider === 'google' && role && validRoles.includes(role) && user.role !== role) {
+        console.log("🔄 Updating Google user role from", user.role, "to", role);
+        user.role = role as 'player' | 'admin' | 'gk';
+        await user.save();
+        console.log("✅ Role updated successfully");
+      }
+    }
+
+    // Generate tokens
+    const accessToken = jwtHelpers.genaretToken(
+      { id: user._id, role: user.role, email: user.email },
+      config.jwt.accessTokenSecret as Secret,
+      config.jwt.accessTokenExpires,
+    );
+
+    const refreshToken = jwtHelpers.genaretToken(
+      { id: user._id, role: user.role, email: user.email },
+      config.jwt.refreshTokenSecret as Secret,
+      config.jwt.refreshTokenExpires,
+    );
+
+    user.lastLogin = new Date();
+    await user.save();
+
+    const { password, ...userWithoutPassword } = user.toObject();
+
+    console.log("=== GOOGLE LOGIN BACKEND COMPLETE ===");
+    console.log("Returning user with role:", userWithoutPassword.role);
+
+    return {
+      accessToken,
+      refreshToken,
+      user: userWithoutPassword,
+    };
+  } catch (error) {
+    console.error("❌ Google login error:", error);
+    throw error;
   }
-
-  // 4. generate tokens
-  const accessToken = jwtHelpers.genaretToken(
-    { id: user._id, role: user.role, email: user.email },
-    config.jwt.accessTokenSecret as Secret,
-    config.jwt.accessTokenExpires,
-  );
-
-  const refreshToken = jwtHelpers.genaretToken(
-    { id: user._id, role: user.role, email: user.email },
-    config.jwt.refreshTokenSecret as Secret,
-    config.jwt.refreshTokenExpires,
-  );
-
-  user.lastLogin = new Date();
-  await user.save();
-
-  const { password, ...userWithoutPassword } = user.toObject();
-
-  return {
-    accessToken,
-    refreshToken,
-    user: userWithoutPassword,
-  };
 };
+
+// const googleLogin = async (idToken: string, role?: string) => {
+//    console.log("Received role in backend:", role); 
+//   const payload = await jwtHelpers.verifyGoogleToken(idToken);
+
+//   const email = payload.email!;
+//   const firstName = payload.given_name || payload.name || 'Google';
+//   const lastName = payload.family_name || '';
+//   const profileImage = payload.picture;
+
+//   let user = await User.findOne({ email });
+
+//   if (!user) {
+//     user = await User.create({
+//       firstName,
+//       lastName,
+//       email,
+//       password: 'GOOGLE_AUTH', // dummy password
+//       role: role || 'player', // default role
+//       provider: 'google',
+//       verified: true,
+//       profileImage,
+//     });
+//   }
+
+//   // 4. generate tokens
+//   const accessToken = jwtHelpers.genaretToken(
+//     { id: user._id, role: user.role, email: user.email },
+//     config.jwt.accessTokenSecret as Secret,
+//     config.jwt.accessTokenExpires,
+//   );
+
+//   const refreshToken = jwtHelpers.genaretToken(
+//     { id: user._id, role: user.role, email: user.email },
+//     config.jwt.refreshTokenSecret as Secret,
+//     config.jwt.refreshTokenExpires,
+//   );
+
+//   user.lastLogin = new Date();
+//   await user.save();
+
+//   const { password, ...userWithoutPassword } = user.toObject();
+
+//   return {
+//     accessToken,
+//     refreshToken,
+//     user: userWithoutPassword,
+//   };
+// };
+
+
+
 
 const refreshToken = async (token: string) => {
   const varifiedToken = jwtHelpers.verifyToken(
