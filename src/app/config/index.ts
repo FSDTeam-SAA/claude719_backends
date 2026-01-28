@@ -35,6 +35,10 @@ export default {
     secretKey: process.env.STRIPE_SECRET_KEY,
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
   },
+  paypal: {
+    clientId: process.env.PAYPAL_CLIENT_ID,
+    clientSecret: process.env.PAYPAL_CLIENT_SECRET,
+  },
   frontendUrl: process.env.FRONTEND_URL,
   google: {
     clientId: process.env.GOOGLE_CLIENT_ID,

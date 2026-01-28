@@ -61,4 +61,17 @@ router.post(
 );
 router.post('/:teamId/pay/:id', SubscriptionController.payTeamSubScription);
 
+// router.post(
+//   '/paypal/pay/:id',
+//   auth(userRole.player, userRole.gk),
+//   SubscriptionController.paySubscriptionPaypal,
+// );
+
+// router.post(
+//   '/paypal/team/:teamId/pay/:id',
+//   SubscriptionController.payTeamSubscriptionPaypal,
+// );
+
+// router.post('/paypal/capture', SubscriptionController.capturePaypalPayment);
+
 export const subscriptionRouter = router;
