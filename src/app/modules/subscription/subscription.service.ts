@@ -8,6 +8,10 @@ import User from '../user/user.model';
 import Payment from '../payment/payment.model';
 import Team from '../team/team.model';
 import sendMailer from '../../helper/sendMailer';
+import {
+  capturePaypalOrder,
+  createPaypalOrder,
+} from '../../helper/paypalService';
 
 const stripe = new Stripe(config.stripe.secretKey!);
 
@@ -222,6 +226,116 @@ const payTeamSubScription = async (teamId: string, subscriptionId: string) => {
   return { url: session.url };
 };
 
+// =====================================================
+
+// const paySubscriptionPaypal = async (
+//   userId: string,
+//   subscriptionId: string,
+// ) => {
+//   const user = await User.findById(userId);
+//   if (!user) throw new AppError(404, 'User not found');
+
+//   const subscription = await Subscription.findById(subscriptionId);
+//   if (!subscription) throw new AppError(404, 'Subscription not found');
+
+//   const order = await createPaypalOrder(subscription.price!, {
+//     userId,
+//     subscriptionId,
+//     paymentType: 'Individual',
+//   });
+
+//   await Payment.create({
+//     user: user._id,
+//     subscription: subscription._id,
+//     amount: subscription.price,
+//     currency: 'usd',
+//     paymentType: 'Individual',
+//     status: 'pending',
+//     stripeSessionId: order.id, // reused field
+//   });
+
+//   return {
+//     orderId: order.id,
+//     approveUrl: order.links.find((l: any) => l.rel === 'approve')?.href,
+//   };
+// };
+
+// const payTeamSubscriptionPaypal = async (
+//   teamId: string,
+//   subscriptionId: string,
+// ) => {
+//   const team = await Team.findById(teamId);
+//   if (!team) throw new AppError(404, 'Team not found');
+
+//   const subscription = await Subscription.findById(subscriptionId);
+//   if (!subscription) throw new AppError(404, 'Subscription not found');
+
+//   const order = await createPaypalOrder(subscription.price!, {
+//     teamId,
+//     subscriptionId,
+//     paymentType: 'TeamGame',
+//   });
+
+//   await Payment.create({
+//     team: team._id,
+//     user: team._id,
+//     subscription: subscription._id,
+//     amount: subscription.price,
+//     currency: 'usd',
+//     paymentType: 'TeamGame',
+//     status: 'pending',
+//     stripeSessionId: order.id,
+//   });
+
+//   return {
+//     orderId: order.id,
+//     approveUrl: order.links.find((l: any) => l.rel === 'approve')?.href,
+//   };
+// };
+
+// const capturePaypalPayment = async (orderId: string) => {
+//   const capture = await capturePaypalOrder(orderId);
+
+//   if (capture.status !== 'COMPLETED') {
+//     throw new AppError(400, 'Payment not completed');
+//   }
+
+//   const payment = await Payment.findOne({ stripeSessionId: orderId });
+//   if (!payment) throw new AppError(404, 'Payment record not found');
+
+//   payment.status = 'completed';
+//   await payment.save();
+
+//   const subscription = await Subscription.findById(payment.subscription);
+
+//   /* ========== INDIVIDUAL ========== */
+//   if (payment.paymentType === 'Individual') {
+//     const user = await User.findById(payment.user);
+//     if (!user || !subscription) return;
+
+//     const months = subscription.interval === 'yearly' ? 12 : 1;
+//     const expiry = new Date();
+//     expiry.setMonth(expiry.getMonth() + months);
+
+//     user.isSubscription = true;
+//     user.subscription = subscription._id;
+//     user.subscriptionExpiry = expiry;
+//     user.numberOfGame = subscription.numberOfGames ?? undefined;
+//     await user.save();
+//   }
+
+//   /* ========== TEAM GAME ========== */
+//   if (payment.paymentType === 'TeamGame') {
+//     const team = await Team.findById(payment.team);
+//     if (!team || !subscription) return;
+
+//     team.subscription = subscription._id;
+//     await team.save();
+//   }
+
+//   return { success: true };
+// };
+
 export const SubscriptionService = {
   createSubscription,
   getAllSubscription,
@@ -231,4 +345,8 @@ export const SubscriptionService = {
   activeSubscription,
   paySubscription,
   payTeamSubScription,
+
+  // paySubscriptionPaypal,
+  // payTeamSubscriptionPaypal,
+  // capturePaypalPayment,
 };
