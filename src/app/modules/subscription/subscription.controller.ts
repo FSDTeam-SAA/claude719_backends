@@ -112,6 +112,49 @@ const payTeamSubScription = catchAsync(async (req, res) => {
   });
 });
 
+// =========================================
+
+// const paySubscriptionPaypal = catchAsync(async (req, res) => {
+//   const result = await SubscriptionService.paySubscriptionPaypal(
+//     req.user!.id,
+//     req.params.id!,
+//   );
+
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'PayPal order created',
+//     data: result,
+//   });
+// });
+
+// const payTeamSubscriptionPaypal = catchAsync(async (req, res) => {
+//   const result = await SubscriptionService.payTeamSubscriptionPaypal(
+//     req.params.teamId!,
+//     req.params.id!,
+//   );
+
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'PayPal team order created',
+//     data: result,
+//   });
+// });
+
+// const capturePaypalPayment = catchAsync(async (req, res) => {
+//   const { orderId } = req.body;
+
+//   const result = await SubscriptionService.capturePaypalPayment(orderId);
+
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'PayPal payment completed',
+//     data: result,
+//   });
+// });
+
 export const SubscriptionController = {
   createSubscription,
   getAllSubscription,
@@ -121,4 +164,8 @@ export const SubscriptionController = {
   activeSubscription,
   paySubscription,
   payTeamSubScription,
+
+  // paySubscriptionPaypal,
+  // payTeamSubscriptionPaypal,
+  // capturePaypalPayment,
 };
