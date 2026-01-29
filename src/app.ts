@@ -11,11 +11,25 @@ const app = express();
 // Middlewares
 app.use(cors({ origin: '*', credentials: true }));
 app.use(cookieParser());
-app.post(
-  '/api/stripe/webhook',
-  express.raw({ type: 'application/json' }),
-  webHookHandlers,
-);
+// app.post(
+//   '/api/stripe/webhook',
+//   express.raw({ type: 'application/json' }),
+//   webHookHandlers,
+// );
+
+// app.ts - Webhook রিকোয়েস্ট লগ করার জন্য
+// app.post(
+//   '/api/paypal/webhook',
+//   express.json(),
+//   (req, res, next) => {
+//     console.log('🔄 PayPal Webhook Received');
+//     console.log('📋 Headers:', JSON.stringify(req.headers, null, 2));
+//     console.log('📦 Body:', JSON.stringify(req.body, null, 2));
+//     console.log('🔍 Event Type:', req.body.event_type);
+//     next();
+//   },
+//   webHookHandlers,
+// );
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
