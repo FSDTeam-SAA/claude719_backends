@@ -61,51 +61,51 @@ router.post(
 // );
 // router.post('/:teamId/pay/:id', SubscriptionController.payTeamSubScription);
 
-// router.post(
-//   '/pay/:id',
-//   auth(userRole.player, userRole.gk),
-//   SubscriptionController.payIndividualSubscription,
-// );
-
-// // Team subscription payment (Coach or anyone with team access)
-// router.post(
-//   '/team/:teamId/pay/:id',
-//   SubscriptionController.payTeamSubscription,
-// );
-
-// ✅ Individual subscription payment
 router.post(
   '/pay/:id',
-  auth(userRole.player, userRole.gk, userRole.coach, userRole.admin),
-  SubscriptionController.payIndividualSubscription
+  auth(userRole.player, userRole.gk),
+  SubscriptionController.payIndividualSubscription,
 );
 
-// ✅ Team subscription payment
+// Team subscription payment (Coach or anyone with team access)
 router.post(
   '/team/:teamId/pay/:id',
-  auth(userRole.coach, userRole.admin),
-  SubscriptionController.payTeamSubscription
+  SubscriptionController.payTeamSubscription,
 );
 
-// ✅ Payment Success Handler (Webhook alternative)
-router.get(
-  '/payment/success',
-  auth(userRole.player, userRole.gk, userRole.coach, userRole.admin),
-  SubscriptionController.paymentSuccessHandler
-);
+// // ✅ Individual subscription payment
+// router.post(
+//   '/pay/:id',
+//   auth(userRole.player, userRole.gk, userRole.coach, userRole.admin),
+//   SubscriptionController.payIndividualSubscription
+// );
 
-// ✅ Check payment status
-router.get(
-  '/payment/status/:orderId',
-  auth(userRole.player, userRole.gk, userRole.coach, userRole.admin),
-  SubscriptionController.paymentStatusChecker
-);
+// // ✅ Team subscription payment
+// router.post(
+//   '/team/:teamId/pay/:id',
+//   auth(userRole.coach, userRole.admin),
+//   SubscriptionController.payTeamSubscription
+// );
 
-// ✅ Manual payment verification (for testing/admin)
-router.post(
-  '/payment/verify',
-  auth(userRole.admin),
-  SubscriptionController.manualPaymentVerification
-);
+// // ✅ Payment Success Handler (Webhook alternative)
+// router.get(
+//   '/payment/success',
+//   auth(userRole.player, userRole.gk, userRole.coach, userRole.admin),
+//   SubscriptionController.paymentSuccessHandler
+// );
+
+// // ✅ Check payment status
+// router.get(
+//   '/payment/status/:orderId',
+//   auth(userRole.player, userRole.gk, userRole.coach, userRole.admin),
+//   SubscriptionController.paymentStatusChecker
+// );
+
+// // ✅ Manual payment verification (for testing/admin)
+// router.post(
+//   '/payment/verify',
+//   auth(userRole.admin),
+//   SubscriptionController.manualPaymentVerification
+// );
 
 export const subscriptionRouter = router;

@@ -3,6 +3,7 @@ export interface ISubscription {
   interval: 'monthly' | 'yearly';
   price: number;
   currency: string;
+  status: 'active' | 'inactive';
 
   // yearly = fixed games
   // monthly = unlimited (null)
