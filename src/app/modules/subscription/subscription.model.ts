@@ -22,6 +22,11 @@ const SubscriptionSchema = new Schema(
       type: Number,
       default: null, // monthly unlimited
     },
+    status: {
+      type: String,
+      enum: ['active', 'inactive'],
+      default: 'active',
+    },
 
     isActive: { type: Boolean, default: true },
     totalSubscripeUser: [{ type: Schema.Types.ObjectId, ref: 'User' }],

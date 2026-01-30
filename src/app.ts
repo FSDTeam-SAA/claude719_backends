@@ -18,18 +18,28 @@ app.use(cookieParser());
 // );
 
 // app.ts - Webhook রিকোয়েস্ট লগ করার জন্য
-// app.post(
-//   '/api/paypal/webhook',
-//   express.json(),
-//   (req, res, next) => {
-//     console.log('🔄 PayPal Webhook Received');
-//     console.log('📋 Headers:', JSON.stringify(req.headers, null, 2));
-//     console.log('📦 Body:', JSON.stringify(req.body, null, 2));
-//     console.log('🔍 Event Type:', req.body.event_type);
-//     next();
-//   },
-//   webHookHandlers,
-// );
+app.post(
+  '/api/paypal/webhook',
+  express.raw({ type: 'application/json' }),
+  (req, res, next) => {
+    console.log('🔄 PayPal Webhook Received');
+    console.log('📋 Headers:', JSON.stringify(req.headers, null, 2));
+    console.log('📦 Raw Body:', req.body.toString('utf8').substring(0, 500));
+
+    // Parse the raw body to JSON for logging
+    try {
+      const bodyJson = JSON.parse(req.body.toString('utf8'));
+      console.log('🔍 Event Type:', bodyJson.event_type);
+      console.log('💰 Resource Type:', bodyJson.resource_type);
+      console.log('📝 Resource:', JSON.stringify(bodyJson.resource, null, 2));
+    } catch (error) {
+      console.log('❌ Could not parse webhook body');
+    }
+
+    next();
+  },
+  webHookHandlers,
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
