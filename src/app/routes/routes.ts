@@ -17,6 +17,7 @@ import { playerReportRouter } from '../modules/playerreport/playerreport.routes'
 import { teamRouter } from '../modules/team/team.routes';
 import { dashboardRouter } from '../modules/dashboard/dashboard.routes';
 import { gkDistributionstatsRouter } from '../modules/gkdistributionstats/gkdistributionstats.routes';
+import { marketvalueRouter } from '../modules/marketvalue/marketvalue.routes';
 
 const router = Router();
 
@@ -92,6 +93,10 @@ const moduleRoutes = [
   {
     path: '/gkdistributionstats',
     route: gkDistributionstatsRouter,
+  },
+  {
+    path: '/marketvalue',
+    route: marketvalueRouter,
   },
 ];
 
