@@ -8,6 +8,7 @@ import Distributionstats from '../distributionstats/distributionstats.model';
 import Fouls from '../fouls/fouls.model';
 import GkDistributionStats from '../gkdistributionstats/gkdistributionstats.model';
 import Gkstats from '../gkstats/gkstats.model';
+import Marketvalue from '../marketvalue/marketvalue.model';
 import National from '../national/national.model';
 import PlayerReport from '../playerreport/playerreport.model';
 import Rating from '../rating/rating.model';
@@ -118,6 +119,7 @@ const getSingleUserDetails = async (id: string) => {
     transferHistory: await TransferHistory.find(matchField),
     gkDistributionStats: await GkDistributionStats.find(matchField),
     avarageRatting: averageRatingData,
+    marketValue: await Marketvalue.find(matchField),
     semelierPlayer,
   };
 };
@@ -189,6 +191,7 @@ const profile = async (id: string) => {
     transferHistory,
     gkDistributionStats,
     attackingstat,
+    marketValue,
   ] = await Promise.all([
     Rating.find(matchField),
     Gkstats.find(matchField),
@@ -201,6 +204,7 @@ const profile = async (id: string) => {
     TransferHistory.find(matchField),
     GkDistributionStats.find(matchField),
     Attackingstat.find(matchField),
+    Marketvalue.find(matchField),
   ]);
 
   return {
@@ -215,6 +219,7 @@ const profile = async (id: string) => {
       national,
       gkDistributionStats,
       attackingstat,
+      marketValue,
     },
     reports,
     transferHistory,
