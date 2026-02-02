@@ -55,91 +55,178 @@ const loginUser = async (payload: Partial<IUser>) => {
 };
 
 
+// const googleLogin = async (idToken: string, role?: string) => {
+//   try {
+//     console.log("=== GOOGLE LOGIN BACKEND START ===");
+//     console.log("Received role parameter:", role);
+    
+//     const payload = await jwtHelpers.verifyGoogleToken(idToken);
+
+//     const email = payload.email!;
+//     const firstName = payload.given_name || payload.name || 'Google User';
+//     const lastName = payload.family_name || '';
+//     const profileImage = payload.picture;
+
+//     console.log("User email:", email);
+
+//     // Check if user exists
+//     let user = await User.findOne({ email });
+
+//     if (!user) {
+//       // ✅ NEW USER - Create with the provided role
+//       console.log("🔍 User NOT found in database. Creating new user...");
+      
+//       // Use provided role, default to 'player' if not provided
+//       const validRoles = ['player', 'admin', 'gk'];
+//       const userRole = (role && validRoles.includes(role) ? role : 'player') as 'player' | 'admin' | 'gk';
+      
+//       console.log("🎯 Creating user with role:", userRole);
+      
+//       user = await User.create({
+//         firstName,
+//         lastName,
+//         email,
+//         password: 'GOOGLE_AUTH_' + Math.random().toString(36).slice(2),
+//         role: userRole, // ✅ This is the critical line - using provided role
+//         provider: 'google',
+//         verified: true,
+//         profileImage,
+//       });
+      
+//       console.log("✅ New user created successfully!");
+//       console.log("📋 User details:", {
+//         email: user.email,
+//         role: user.role,
+//         id: user._id
+//       });
+      
+//     } else {
+//       // ✅ EXISTING USER - Keep existing role
+//       console.log("🔍 User exists in database");
+//       console.log("📋 Existing user details:", {
+//         email: user.email,
+//         currentRole: user.role,
+//         provider: user.provider
+//       });
+      
+//       // Only update role if it's a Google user and role is different
+//       // This prevents changing role for existing email/password users
+//       const validRoles = ['player', 'admin', 'gk'];
+//       if (user.provider === 'google' && role && validRoles.includes(role) && user.role !== role) {
+//         console.log("🔄 Updating Google user role from", user.role, "to", role);
+//         user.role = role as 'player' | 'admin' | 'gk';
+//         await user.save();
+//         console.log("✅ Role updated successfully");
+//       }
+//     }
+
+//     // Generate tokens
+//     const accessToken = jwtHelpers.genaretToken(
+//       { id: user._id, role: user.role, email: user.email },
+//       config.jwt.accessTokenSecret as Secret,
+//       config.jwt.accessTokenExpires,
+//     );
+
+//     const refreshToken = jwtHelpers.genaretToken(
+//       { id: user._id, role: user.role, email: user.email },
+//       config.jwt.refreshTokenSecret as Secret,
+//       config.jwt.refreshTokenExpires,
+//     );
+
+//     user.lastLogin = new Date();
+//     await user.save();
+
+//     const { password, ...userWithoutPassword } = user.toObject();
+
+//     console.log("=== GOOGLE LOGIN BACKEND COMPLETE ===");
+//     console.log("Returning user with role:", userWithoutPassword.role);
+
+//     return {
+//       accessToken,
+//       refreshToken,
+//       user: userWithoutPassword,
+//     };
+//   } catch (error) {
+//     console.error("❌ Google login error:", error);
+//     throw error;
+//   }
+// };
+
+//============================update code ==============================
+
 const googleLogin = async (idToken: string, role?: string) => {
   try {
     console.log("=== GOOGLE LOGIN BACKEND START ===");
-    console.log("Received role parameter:", role);
-    
+
     const payload = await jwtHelpers.verifyGoogleToken(idToken);
 
     const email = payload.email!;
-    const firstName = payload.given_name || payload.name || 'Google User';
-    const lastName = payload.family_name || '';
+    const firstName = payload.given_name || payload.name || "Google User";
+    const lastName = payload.family_name || "";
     const profileImage = payload.picture;
 
     console.log("User email:", email);
 
-    // Check if user exists
+    // 🔍 Check if user already exists
     let user = await User.findOne({ email });
 
+    // ===============================
+    // ✅ NEW USER (FIRST TIME LOGIN)
+    // ===============================
     if (!user) {
-      // ✅ NEW USER - Create with the provided role
-      console.log("🔍 User NOT found in database. Creating new user...");
-      
-      // Use provided role, default to 'player' if not provided
-      const validRoles = ['player', 'admin', 'gk'];
-      const userRole = (role && validRoles.includes(role) ? role : 'player') as 'player' | 'admin' | 'gk';
-      
-      console.log("🎯 Creating user with role:", userRole);
-      
+      console.log("🆕 New Google user detected");
+
+      const validRoles = ["player", "admin", "gk"] as const;
+
+      // ✅ Role only applied on FIRST signup
+      const userRole =
+        role && validRoles.includes(role as any) ? role : "player";
+
       user = await User.create({
         firstName,
         lastName,
         email,
-        password: 'GOOGLE_AUTH_' + Math.random().toString(36).slice(2),
-        role: userRole, // ✅ This is the critical line - using provided role
-        provider: 'google',
+        password: "GOOGLE_AUTH_" + Math.random().toString(36).slice(2),
+        role: userRole, // ✅ SET ONCE
+        provider: "google",
         verified: true,
         profileImage,
       });
-      
-      console.log("✅ New user created successfully!");
-      console.log("📋 User details:", {
-        email: user.email,
-        role: user.role,
-        id: user._id
-      });
-      
-    } else {
-      // ✅ EXISTING USER - Keep existing role
-      console.log("🔍 User exists in database");
-      console.log("📋 Existing user details:", {
-        email: user.email,
-        currentRole: user.role,
-        provider: user.provider
-      });
-      
-      // Only update role if it's a Google user and role is different
-      // This prevents changing role for existing email/password users
-      const validRoles = ['player', 'admin', 'gk'];
-      if (user.provider === 'google' && role && validRoles.includes(role) && user.role !== role) {
-        console.log("🔄 Updating Google user role from", user.role, "to", role);
-        user.role = role as 'player' | 'admin' | 'gk';
-        await user.save();
-        console.log("✅ Role updated successfully");
-      }
+
+      console.log("✅ User created with role:", user.role);
     }
 
-    // Generate tokens
+    // ===============================
+    // ✅ EXISTING USER (NO ROLE CHANGE)
+    // ===============================
+    else {
+      console.log("👤 Existing user login");
+      console.log("🔒 Role locked as:", user.role);
+    }
+
+    // ===============================
+    // 🔐 TOKEN GENERATION
+    // ===============================
     const accessToken = jwtHelpers.genaretToken(
       { id: user._id, role: user.role, email: user.email },
       config.jwt.accessTokenSecret as Secret,
-      config.jwt.accessTokenExpires,
+      config.jwt.accessTokenExpires
     );
 
     const refreshToken = jwtHelpers.genaretToken(
       { id: user._id, role: user.role, email: user.email },
       config.jwt.refreshTokenSecret as Secret,
-      config.jwt.refreshTokenExpires,
+      config.jwt.refreshTokenExpires
     );
 
+    // 🕒 Update last login time
     user.lastLogin = new Date();
     await user.save();
 
     const { password, ...userWithoutPassword } = user.toObject();
 
     console.log("=== GOOGLE LOGIN BACKEND COMPLETE ===");
-    console.log("Returning user with role:", userWithoutPassword.role);
+    console.log("Returned role:", userWithoutPassword.role);
 
     return {
       accessToken,
@@ -151,6 +238,13 @@ const googleLogin = async (idToken: string, role?: string) => {
     throw error;
   }
 };
+
+
+
+
+
+
+// ==============================================
 
 // const googleLogin = async (idToken: string, role?: string) => {
 //    console.log("Received role in backend:", role); 
