@@ -342,8 +342,8 @@ const payIndividualSubscription = async (
       },
     ],
     application_context: {
-      return_url: `${config.frontendUrl}/payment/success?type=individual&userId=${userId}&subscriptionId=${subscriptionId}`,
-      cancel_url: `${config.frontendUrl}/payment/cancel?type=individual`,
+      return_url: `${config.frontendUrl}/success?type=individual&userId=${userId}&subscriptionId=${subscriptionId}`,
+      cancel_url: `${config.frontendUrl}/cancel?type=individual`,
       user_action: 'PAY_NOW',
       brand_name: 'Your App Name',
       landing_page: 'BILLING',
