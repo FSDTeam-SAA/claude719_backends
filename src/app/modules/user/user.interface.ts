@@ -42,6 +42,9 @@ export interface IUser {
   schoolName?: string;
   // designation?: string;
   nationality?:string;
+  emailVerified?:boolean;
+  emailVerifyToken?:string | undefined;
+  emailVerifyExpires?:Date | undefined;
 
   isSubscription?: boolean;
   subscription?: Types.ObjectId;
