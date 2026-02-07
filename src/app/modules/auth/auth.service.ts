@@ -35,7 +35,7 @@ const registerUser = async (payload: Partial<IUser>) => {
   const user = await User.create({
     ...payload,
     emailVerifyToken: hashedToken,
-    emailVerifyExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 15 min
+    emailVerifyExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
   });
 
   // const verifyUrl = `${config.frontendUrl}/verify-email?token=${token}`;
@@ -66,7 +66,6 @@ const verifyEmailByToken = async (token: string) => {
   });
 
   if (!user) {
-    await User.deleteOne({ emailVerifyToken: hashedToken });
     throw new AppError(
       400,
       'Invalid or expired verification link .Please again register',
@@ -81,6 +80,45 @@ const verifyEmailByToken = async (token: string) => {
 
   return { message: 'Email verified successfully' };
 };
+
+// const verifyEmailByToken = async (token: string) => {
+//   const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+//   // Token অনুযায়ী user খুঁজে নেওয়া
+//   const user = await User.findOne({ emailVerifyToken: hashedToken });
+
+//   if (!user) {
+//     // যদি এমন কোনো token না থাকে
+//     throw new AppError(
+//       400,
+//       'Invalid verification link. Please register again.'
+//     );
+//   }
+
+//   // যদি token expired হয়ে যায়
+//   if (user.emailVerifyExpires! < new Date()) {
+//     // শুধু expired token ইউজার delete করা হবে
+//     await User.deleteOne({ _id: user._id });
+//     throw new AppError(
+//       400,
+//       'Verification link expired. Your registration has been removed. Please register again.'
+//     );
+//   }
+
+//   // যদি user already verified হয়
+//   if (user.emailVerified) {
+//     throw new AppError(400, 'User already verified.');
+//   }
+
+//   // Email ভেরিফাই করা
+//   user.emailVerified = true;
+//   user.emailVerifyToken = undefined;
+//   user.emailVerifyExpires = undefined;
+
+//   await user.save();
+
+//   return { message: 'Email verified successfully' };
+// };
 
 const sendVerificationEmail = async (user: HydratedDocument<IUser>) => {
   const token = crypto.randomBytes(32).toString('hex');
