@@ -41,6 +41,7 @@ export default {
     webhookId: process.env.PAYPAL_WEBHOOK_ID,
   },
   frontendUrl: process.env.FRONTEND_URL,
+  backendUrl: process.env.BACKEND_URL,  
   google: {
     clientId: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
