@@ -7,12 +7,44 @@ import { authService } from './auth.service';
 
 const registerUser = catchAsync(async (req, res) => {
   const result = await authService.registerUser(req.body);
-
   sendResponse(res, {
     statusCode: 201,
     success: true,
     message: 'User registered successfully. Please verify your email.',
     data: result,
+  });
+});
+
+const verifyEmailByToken = catchAsync(async (req, res) => {
+  const { token } = req.query;
+  if (!token) {
+    throw new AppError(400, 'Verification token missing');
+  }
+  await authService.verifyEmailByToken(token as string);
+  res.redirect(
+    `${config.frontendUrl || 'http://localhost:3000'}/login?verified=true`,
+  );
+});
+
+const resendVerificationEmail = catchAsync(async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new AppError(404, 'User not found');
+  }
+
+  if (user.emailVerified) {
+    throw new AppError(400, 'Email already verified');
+  }
+
+  await authService.sendVerificationEmail(user);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Verification email sent again',
   });
 });
 
@@ -61,26 +93,6 @@ const googleLogin = catchAsync(async (req, res) => {
     },
   });
 });
-
-// const checkUserExists = catchAsync(async (req, res) => {
-//   const { email } = req.query;
-
-//   if (!email) {
-//     throw new AppError(400, 'Email is required');
-//   }
-
-//   const user = await User.findOne({ email: email.toString() });
-
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     message: 'User check completed',
-//     data: {
-//       exists: !!user,
-//       role: user?.role || null,
-//     },
-//   });
-// });
 
 const checkUserExists = catchAsync(async (req, res) => {
   const { email } = req.query;
@@ -142,8 +154,6 @@ const verifyEmail = catchAsync(async (req, res) => {
 const resetPassword = catchAsync(async (req, res) => {
   const { email, newPassword } = req.body;
   const result = await authService.resetPassword(email, newPassword);
-
-  // Set the new refreshToken in cookie
   res.cookie('refreshToken', result.refreshToken, {
     httpOnly: true,
     secure: config.env === 'production',
@@ -197,5 +207,7 @@ export const authController = {
   logoutUser,
   changePassword,
   googleLogin,
-  checkUserExists
+  checkUserExists,
+  verifyEmailByToken,
+  resendVerificationEmail,
 };
