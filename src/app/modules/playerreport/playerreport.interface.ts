@@ -16,4 +16,5 @@ export interface IPlayerReport {
   weaknesses?: string;
   distributionSummary?: string;
   generalComments?: string;
+  numberOfGames?: number;
 }
