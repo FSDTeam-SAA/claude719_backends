@@ -1,11 +1,7 @@
 import nodemailer from 'nodemailer';
 import config from '../config';
 
-const sendMailer = async (
-  email: string,
-  subject?: string,
-  html?: string,
-) => {
+const sendMailer = async (email: string, subject?: string, html?: string) => {
   const transporter = nodemailer.createTransport({
     host: config.email.host,
     port: Number(config.email.port),
@@ -16,7 +12,7 @@ const sendMailer = async (
     },
   });
   const info = await transporter.sendMail({
-    from: `"your company name" ${config.email.from}`,
+    from: `"claude719" ${config.email.from}`,
     to: email,
     subject,
     html,
