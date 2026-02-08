@@ -40,6 +40,11 @@ const playerReportSchema = new Schema<IPlayerReport>(
       type: String,
       trim: true,
     },
+    numberOfGames:{
+      
+      type: Number,
+      default: 0
+    },
     strengths: {
       type: String,
       trim: true,
