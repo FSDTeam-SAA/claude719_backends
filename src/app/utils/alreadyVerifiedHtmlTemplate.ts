@@ -25,7 +25,7 @@ export const alreadyVerifiedHtmlTemplate = () => `
       box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     }
     h1 {
-      color: #0284c7;
+      color: #34f105ff;
     }
     p {
       color: #374151;
@@ -35,7 +35,7 @@ export const alreadyVerifiedHtmlTemplate = () => `
       display: inline-block;
       margin-top: 20px;
       padding: 12px 20px;
-      background: #2563eb;
+      background: #25eb25ff;
       color: white;
       text-decoration: none;
       border-radius: 6px;
