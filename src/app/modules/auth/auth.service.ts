@@ -39,7 +39,7 @@ const registerUser = async (payload: Partial<IUser>) => {
   });
 
   // const verifyUrl = `${config.frontendUrl}/verify-email?token=${token}`;
-  const verifyUrl = `${config.backendUrl || 'http://localhost:5000'}/api/v1/auth/verify-email?token=${token}`;
+  const verifyUrl = `${config.backendUrl}/api/v1/auth/verify-email?token=${token}`;
 
   await sendMailer(
     user.email,
