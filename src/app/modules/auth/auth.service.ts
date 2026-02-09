@@ -27,7 +27,8 @@ import { HydratedDocument } from 'mongoose';
 
 const registerUser = async (payload: Partial<IUser>) => {
   const exist = await User.findOne({ email: payload.email });
-  if (exist) throw new AppError(400, 'User already exists');
+  if (exist) throw new Error('User already exists');
+
   payload.provider = 'credentials';
   const token = crypto.randomBytes(32).toString('hex');
   const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
@@ -35,11 +36,10 @@ const registerUser = async (payload: Partial<IUser>) => {
   const user = await User.create({
     ...payload,
     emailVerifyToken: hashedToken,
-    emailVerifyExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+    emailVerifyExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
   });
 
-  // const verifyUrl = `${config.frontendUrl}/verify-email?token=${token}`;
-  const verifyUrl = `${config.backendUrl}/api/v1/auth/verify-email?token=${token}`;
+  const verifyUrl = `${config.backendUrl}/api/v1/auth/verify-email?token=${token}&email=${user.email}`;
 
   await sendMailer(
     user.email,
@@ -51,66 +51,27 @@ const registerUser = async (payload: Partial<IUser>) => {
        Verify Email
     </a>
     <p>This link will expire in 24 hours</p>
-    `,
+    `
   );
 
   return user;
 };
 
-const verifyEmailByToken = async (token: string) => {
-  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-
-  const user = await User.findOne({
-    emailVerifyToken: hashedToken,
-    emailVerifyExpires: { $gt: new Date() },
-  });
-
-  if (!user) {
-    throw new AppError(
-      400,
-      'Invalid or expired verification link .Please again register',
-    );
-  }
-
-  user.emailVerified = true;
-  user.emailVerifyToken = undefined;
-  user.emailVerifyExpires = undefined;
-
-  await user.save();
-
-  return { message: 'Email verified successfully' };
-};
-
 // const verifyEmailByToken = async (token: string) => {
 //   const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
-//   // Token অনুযায়ী user খুঁজে নেওয়া
-//   const user = await User.findOne({ emailVerifyToken: hashedToken });
+//   const user = await User.findOne({
+//     emailVerifyToken: hashedToken,
+//     emailVerifyExpires: { $gt: new Date() },
+//   });
 
 //   if (!user) {
-//     // যদি এমন কোনো token না থাকে
 //     throw new AppError(
 //       400,
-//       'Invalid verification link. Please register again.'
+//       'Invalid or expired verification link .Please again register',
 //     );
 //   }
 
-//   // যদি token expired হয়ে যায়
-//   if (user.emailVerifyExpires! < new Date()) {
-//     // শুধু expired token ইউজার delete করা হবে
-//     await User.deleteOne({ _id: user._id });
-//     throw new AppError(
-//       400,
-//       'Verification link expired. Your registration has been removed. Please register again.'
-//     );
-//   }
-
-//   // যদি user already verified হয়
-//   if (user.emailVerified) {
-//     throw new AppError(400, 'User already verified.');
-//   }
-
-//   // Email ভেরিফাই করা
 //   user.emailVerified = true;
 //   user.emailVerifyToken = undefined;
 //   user.emailVerifyExpires = undefined;
@@ -120,26 +81,54 @@ const verifyEmailByToken = async (token: string) => {
 //   return { message: 'Email verified successfully' };
 // };
 
-const sendVerificationEmail = async (user: HydratedDocument<IUser>) => {
-  const token = crypto.randomBytes(32).toString('hex');
+
+//==================================
+
+const verifyEmailByToken = async (token: string, email: string) => {
   const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-  user.emailVerifyToken = hashedToken;
-  user.emailVerifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+  let user = await User.findOne({ emailVerifyToken: hashedToken });
+
+  if (!user) {
+    // token not found, check email
+    user = await User.findOne({ email });
+    if (user && user.emailVerified) return { status: 'already_verified' };
+    throw { statusCode: 400, message: 'Invalid verification link' };
+  }
+
+  if (user.emailVerifyExpires && user.emailVerifyExpires < new Date()) {
+    await User.findByIdAndDelete(user._id);
+    throw { statusCode: 410, message: 'Verification link expired' };
+  }
+
+  user.emailVerified = true;
+  user.emailVerifyToken = undefined;
+  user.emailVerifyExpires = undefined;
   await user.save();
-  const verifyUrl = `${config.backendUrl}/api/v1/auth/verify-email?token=${token}`;
-  await sendMailer(
-    user.email,
-    user.firstName,
-    `
-      <h3>Verify your email</h3>
-      <a href="${verifyUrl}"
-        style="padding:10px 18px;background:#22c55e;color:#fff;text-decoration:none">
-        Verify Email
-      </a>
-      <p>This link will expire in 24 hours</p>
-    `,
-  );
+
+  return { status: 'verified' };
 };
+
+// const sendVerificationEmail = async (user: HydratedDocument<IUser>) => {
+//   const token = crypto.randomBytes(32).toString('hex');
+//   const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+//   user.emailVerifyToken = hashedToken;
+//   user.emailVerifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+//   await user.save();
+//   const verifyUrl = `${config.backendUrl}/api/v1/auth/verify-email?token=${token}`;
+//   await sendMailer(
+//     user.email,
+//     user.firstName,
+//     `
+//       <h3>Verify your email</h3>
+//       <a href="${verifyUrl}"
+//         style="padding:10px 18px;background:#22c55e;color:#fff;text-decoration:none">
+//         Verify Email
+//       </a>
+//       <p>This link will expire in 24 hours</p>
+//     `,
+//   );
+// };
 
 const loginUser = async (payload: Partial<IUser>) => {
   const user = await User.findOne({ email: payload.email });
@@ -342,5 +331,5 @@ export const authService = {
   changePassword,
   googleLogin,
   verifyEmailByToken,
-  sendVerificationEmail,
+  // sendVerificationEmail,
 };

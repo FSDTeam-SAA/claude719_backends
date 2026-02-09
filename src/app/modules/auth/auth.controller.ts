@@ -1,6 +1,9 @@
 import config from '../../config';
 import AppError from '../../error/appError';
+import { alreadyVerifiedHtmlTemplate } from '../../utils/alreadyVerifiedHtmlTemplate';
 import catchAsync from '../../utils/catchAsycn';
+import { expiredHtmlTemplate } from '../../utils/expiredHtmlTemplate';
+import { invalidHtmlTemplate } from '../../utils/invalidHtmlTemplate';
 import sendResponse from '../../utils/sendResponse';
 import User from '../user/user.model';
 import { authService } from './auth.service';
@@ -16,37 +19,51 @@ const registerUser = catchAsync(async (req, res) => {
 });
 
 const verifyEmailByToken = catchAsync(async (req, res) => {
-  const { token } = req.query;
-  if (!token) {
-    throw new AppError(400, 'Verification token missing');
+  const { token, email } = req.query;
+
+  if (!token || !email) return res.status(400).send(invalidHtmlTemplate());
+
+  try {
+    const result = await authService.verifyEmailByToken(
+      token as string,
+      email as string,
+    );
+
+    if (result.status === 'already_verified') {
+      return res.send(alreadyVerifiedHtmlTemplate());
+    }
+
+    // verified successfully → redirect login
+    return res.redirect(`${config.frontendUrl}/login?verified=true`);
+  } catch (error: any) {
+    if (error.statusCode === 410) {
+      return res.status(410).send(expiredHtmlTemplate());
+    }
+    return res.status(400).send(invalidHtmlTemplate());
   }
-  await authService.verifyEmailByToken(token as string);
-  res.redirect(
-    `${config.frontendUrl}/login?verified=true`,
-  );
 });
 
-const resendVerificationEmail = catchAsync(async (req, res) => {
-  const { email } = req.body;
+// const resendVerificationEmail = catchAsync(async (req, res) => {
+//   const { email } = req.body;
 
-  const user = await User.findOne({ email });
+//   const user = await User.findOne({ email });
 
-  if (!user) {
-    throw new AppError(404, 'User not found');
-  }
+//   if (!user) {
+//     throw new AppError(404, 'User not found');
+//   }
 
-  if (user.emailVerified) {
-    throw new AppError(400, 'Email already verified');
-  }
+//   if (user.emailVerified) {
+//     throw new AppError(400, 'Email already verified');
+//   }
 
-  await authService.sendVerificationEmail(user);
+//   await authService.sendVerificationEmail(user);
 
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: 'Verification email sent again',
-  });
-});
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: 'Verification email sent again',
+//   });
+// });
 
 const loginUser = catchAsync(async (req, res) => {
   const { email, password } = req.body;
@@ -209,5 +226,5 @@ export const authController = {
   googleLogin,
   checkUserExists,
   verifyEmailByToken,
-  resendVerificationEmail,
+  // resendVerificationEmail,
 };
