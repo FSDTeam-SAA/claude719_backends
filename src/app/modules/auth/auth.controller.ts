@@ -22,7 +22,7 @@ const verifyEmailByToken = catchAsync(async (req, res) => {
   }
   await authService.verifyEmailByToken(token as string);
   res.redirect(
-    `${config.frontendUrl || 'http://localhost:3000'}/login?verified=true`,
+    `${config.frontendUrl}/login?verified=true`,
   );
 });
 
