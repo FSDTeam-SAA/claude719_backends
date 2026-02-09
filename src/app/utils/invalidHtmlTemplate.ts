@@ -40,14 +40,14 @@ export const invalidHtmlTemplate = () => `
       display: inline-block;
       margin-top: 22px;
       padding: 12px 22px;
-      background: #2563eb;
+      background: #25eb46ff;
       color: #ffffff;
       text-decoration: none;
       border-radius: 6px;
       font-weight: 600;
     }
     a:hover {
-      background: #1d4ed8;
+      background: #23d81dff;
     }
   </style>
 </head>
