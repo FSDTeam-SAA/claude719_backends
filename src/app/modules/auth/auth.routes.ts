@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post('/register', authController.registerUser);
 router.get('/verify-email', authController.verifyEmailByToken);
-router.post('/resend-verification', authController.resendVerificationEmail);
+// router.post('/resend-verification', authController.resendVerificationEmail);
 
 router.post('/login', authController.loginUser);
 router.post('/google-login', authController.googleLogin);
