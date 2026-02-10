@@ -9,8 +9,8 @@ export interface IAttackingstat {
   shotsOutsidePa: number;
   totalShots: number;
   shotsOnTarget: number;
-  shootingAccuracy: number;
+  shootingAccuracy: string;
   shotsOffTarget: number;
-  passesAccuracy: number;
+  passesAccuracy: string;
   takeOn: number;
 }
