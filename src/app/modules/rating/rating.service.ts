@@ -103,6 +103,50 @@ const deleteRating = async (id: string) => {
   return result;
 };
 
+// const calculateStars = (rating: number): number => {
+//   if (rating >= 8.8) return 5;
+//   if (rating >= 8) return 4;
+//   if (rating >= 5) return 3;
+//   if (rating >= 3) return 2;
+//   if (rating > 0) return 1;
+//   return 0;
+// };
+
+// const getAverageRatingByUser = async (userId: string) => {
+//   const ratings = await Rating.find({
+//     $or: [{ player: userId }, { gk: userId }],
+//   });
+
+//   if (!ratings.length) {
+//     return {
+//       averageRating: 0,
+//       gamesNumber: 0,
+//       stars: 0,
+//     };
+//   }
+
+//   const totalRating = ratings.reduce(
+//     (sum, item) => sum + (item.rating || 0),
+//     0,
+//   );
+
+//   const totalGames = ratings.reduce(
+//     (sum, item) => sum + (item.gamesNumber || 0),
+//     0,
+//   );
+
+//   const averageRating = totalGames > 0 ? totalRating / totalGames : 0;
+
+//   const stars = calculateStars(averageRating);
+
+//   return {
+//     averageRating: Number(averageRating.toFixed(1)),
+//     gamesNumber: totalGames,
+//     stars,
+//   };
+// };
+
+
 const calculateStars = (rating: number): number => {
   if (rating >= 8.8) return 5;
   if (rating >= 8) return 4;
@@ -113,10 +157,12 @@ const calculateStars = (rating: number): number => {
 };
 
 const getAverageRatingByUser = async (userId: string) => {
+  // console.log(userId);
   const ratings = await Rating.find({
     $or: [{ player: userId }, { gk: userId }],
   });
 
+  // no rating
   if (!ratings.length) {
     return {
       averageRating: 0,
@@ -125,26 +171,28 @@ const getAverageRatingByUser = async (userId: string) => {
     };
   }
 
+  // sum of all ratings
   const totalRating = ratings.reduce(
     (sum, item) => sum + (item.rating || 0),
     0,
   );
 
-  const totalGames = ratings.reduce(
-    (sum, item) => sum + (item.gamesNumber || 0),
-    0,
-  );
+  // total number of ratings
+  const totalRatingsCount = ratings.length;
 
-  const averageRating = totalGames > 0 ? totalRating / totalGames : 0;
+  // FIXED average calculation
+  const averageRating = totalRating / totalRatingsCount;
 
+  // stars logic unchanged
   const stars = calculateStars(averageRating);
 
   return {
     averageRating: Number(averageRating.toFixed(1)),
-    gamesNumber: totalGames,
+    gamesNumber: totalRatingsCount, // same field name kept
     stars,
   };
 };
+
 
 export const ratingService = {
   createRating,
