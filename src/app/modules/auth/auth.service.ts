@@ -45,13 +45,13 @@ const registerUser = async (payload: Partial<IUser>) => {
     user.email,
     user.firstName,
     `
-    <h3>Verify your email</h3>
+    <h3>Please confirm your email address</h3>
     <a href="${verifyUrl}"
        style="padding:10px 18px;background:#22c55e;color:#fff;text-decoration:none">
        Verify Email
     </a>
     <p>This link will expire in 24 hours</p>
-    `
+    `,
   );
 
   return user;
@@ -80,7 +80,6 @@ const registerUser = async (payload: Partial<IUser>) => {
 
 //   return { message: 'Email verified successfully' };
 // };
-
 
 //==================================
 
