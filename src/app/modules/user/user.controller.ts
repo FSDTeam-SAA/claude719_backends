@@ -21,6 +21,7 @@ const getAllUser = catchAsync(async (req, res) => {
     'email',
     'role',
     'citizenship',
+    'nationality',
     'position',
     'category',
     'jerseyNumber',
