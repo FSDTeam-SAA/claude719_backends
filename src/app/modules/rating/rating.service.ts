@@ -21,8 +21,8 @@ const createRating = async (userId: string, payload: IRating) => {
     }
   }
 
-  let filter: any = {};
-  let owner: any = {};
+  const filter: any = {};
+  const owner: any = {};
 
   if (user.role === userRole.player) {
     filter.player = user._id;
@@ -146,7 +146,6 @@ const deleteRating = async (id: string) => {
 //   };
 // };
 
-
 const calculateStars = (rating: number): number => {
   if (rating >= 8.8) return 5;
   if (rating >= 8) return 4;
@@ -192,7 +191,6 @@ const getAverageRatingByUser = async (userId: string) => {
     stars,
   };
 };
-
 
 export const ratingService = {
   createRating,
