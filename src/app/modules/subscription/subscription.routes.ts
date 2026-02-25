@@ -67,4 +67,10 @@ router.post(
   SubscriptionController.payTeamSubscription,
 );
 
+router.post(
+  '/evaluation/:id',
+  auth(userRole.player, userRole.gk),
+  SubscriptionController.payEvaluationSubscription,
+);
+
 export const subscriptionRouter = router;

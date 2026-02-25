@@ -9,7 +9,7 @@ const SubscriptionSchema = new Schema(
     features: [String],
     paymentType: {
       type: String,
-      enum: ['Individual', 'TeamGame'],
+      enum: ['Individual', 'TeamGame', 'Evaluation'],
       required: true,
     },
 
@@ -21,6 +21,10 @@ const SubscriptionSchema = new Schema(
     numberOfGames: {
       type: Number,
       default: null, // monthly unlimited
+    },
+    evaluationLimit: {
+      type: Number,
+      default: null,
     },
     status: {
       type: String,

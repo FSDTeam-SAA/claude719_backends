@@ -45,7 +45,7 @@ export interface IUser {
   emailVerified?:boolean;
   emailVerifyToken?:string | undefined;
   emailVerifyExpires?:Date | undefined;
-
+  isEvaluation?:boolean;
   isSubscription?: boolean;
   subscription?: Types.ObjectId;
   subscriptionExpiry?: Date;

@@ -153,6 +153,15 @@ const handlePaymentCaptured = async (resource: any) => {
     });
     console.log(`✅ Team subscription activated`);
   }
+
+  if (payment.paymentType === 'Evaluation') {
+    await User.findByIdAndUpdate(payment.user, {
+      isSubscription: true,
+      isEvaluation: true,
+      subscription: subscription._id,
+    });
+    console.log(`✅ User evaluation subscription activated`);
+  }
 };
 
 const handlePaymentFailed = async (resource: any) => {
