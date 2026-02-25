@@ -28,7 +28,7 @@ const PaymentSchema = new Schema(
     },
     paymentType: {
       type: String,
-      enum: ['Individual', 'TeamGame'],
+      enum: ['Individual', 'TeamGame', 'Evaluation'],
       required: true,
     },
   },

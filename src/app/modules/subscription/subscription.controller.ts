@@ -111,6 +111,22 @@ const payTeamSubscription = catchAsync(async (req, res) => {
   });
 });
 
+const payEvaluationSubscription = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const result = await SubscriptionService.payEvaluationSubscription(
+    req.user?.id,
+    id!,
+  );
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Evaluation subscription payment initiated successfully',
+    data: result,
+  });
+});
+
 export const SubscriptionController = {
   createSubscription,
   getAllSubscription,
@@ -120,4 +136,5 @@ export const SubscriptionController = {
   activeSubscription,
   payIndividualSubscription,
   payTeamSubscription,
+  payEvaluationSubscription,
 };
