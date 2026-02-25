@@ -158,6 +158,10 @@ const userSchema = new Schema<IUser>(
     nationality: {
       type: String,
     },
+    isEvaluation: {
+      type: Boolean,
+      default: false,
+    },
 
     // admin profile
     designation: {
