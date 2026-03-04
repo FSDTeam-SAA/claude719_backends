@@ -476,97 +476,330 @@ const unfollowUser = async (userId: string, targetUserId: string) => {
 //   return result.sort((a, b) => b.similarity - a.similarity).slice(0, 6);
 // };
 
+//===============================update ===================================
+
+// const similerPlayersAndGK = async (userId: string) => {
+//   const baseUser = await User.findById(userId);
+//   if (!baseUser) return [];
+
+//   const isGK = baseUser.role === 'gk';
+//   const baseMatch = isGK ? { gk: baseUser._id } : { player: baseUser._id };
+
+//   // base stats required
+//   const baseStats = isGK
+//     ? await Gkstats.findOne(baseMatch)
+//     : await Attackingstat.findOne(baseMatch);
+
+//   if (!baseStats) return [];
+
+//   // only same role users
+//   const candidates = await User.find({
+//     _id: { $ne: userId },
+//     role: baseUser.role,
+//   });
+
+//   const result: any[] = [];
+
+//   // weight distribution (exact 100%)
+//   const WEIGHT = 100 / 3; // 33.3333
+
+//   for (const user of candidates) {
+//     const match = isGK ? { gk: user._id } : { player: user._id };
+
+//     const stats = isGK
+//       ? await Gkstats.findOne(match)
+//       : await Attackingstat.findOne(match);
+
+//     if (!stats) continue;
+
+//     const national = await National.findOne(match);
+//     const transfer = await TransferHistory.findOne(match).sort({
+//       createdAt: -1,
+//     });
+
+//     /* ================= SIMILARITY ================= */
+//     let similarity = 0;
+
+//     /* ---------- Position (33.33) ---------- */
+//     let positionScore = 0;
+
+//     if (isGK) {
+//       // GK already filtered by role
+//       positionScore = WEIGHT;
+//     } else if (
+//       baseUser.position?.some((p) => user.position?.includes(p))
+//     ) {
+//       positionScore = WEIGHT;
+//     }
+
+//     similarity += positionScore;
+
+//     /* ---------- Age (33.33) ---------- */
+//     let ageScore = 0;
+
+//     const baseAge = baseUser.age ?? null;
+//     const compareAge = user.age ?? null;
+
+//     if (baseAge !== null && compareAge !== null) {
+//       const ageDiff = Math.abs(baseAge - compareAge);
+
+//       // tolerance = 10 years (tweakable)
+//       ageScore = Math.max(0, 1 - ageDiff / 10) * WEIGHT;
+//     }
+
+//     similarity += ageScore;
+
+//     /* ---------- Nationality (33.33) ---------- */
+//     let nationalityScore = 0;
+
+//     if (
+//       baseUser.nationality &&
+//       user.nationality &&
+//       baseUser.nationality.toLowerCase() ===
+//         user.nationality.toLowerCase()
+//     ) {
+//       nationalityScore = WEIGHT;
+//     }
+
+//     similarity += nationalityScore;
+
+//     similarity = Math.round(similarity);
+
+//     // minimum similarity filter (optional)
+//     if (similarity < 30) continue;
+
+//     /* ================= FINAL OUTPUT ================= */
+//     result.push({
+//       _id: user._id,
+//       name: `${user.firstName} ${user.lastName}`,
+//       profileImage: user.profileImage,
+//       age: user.age,
+//       nationality: user.nationality || null,
+//       position: user.position,
+//       teamName: user.teamName,
+
+//       similarity,
+
+//       // Player specific
+//       ...(user.role === 'player' && {
+//         goals: (stats as any).goals,
+//         assists: (stats as any).assists,
+//       }),
+
+//       // GK specific
+//       ...(user.role === 'gk' && {
+//         saves: (stats as any).saves,
+//         goalsConceded: (stats as any).goalsConceded,
+//       }),
+
+//       // National team
+//       nationalTeam: national
+//         ? {
+//             teamName: national.teamName,
+//             match: national.match,
+//             goals: national.goals,
+//             flag: national.flag,
+//           }
+//         : null,
+
+//       // Latest transfer
+//       lastTransfer: transfer
+//         ? {
+//             season: transfer.season,
+//             leftClub: transfer.leftClubName,
+//             joinedClub: transfer.joinedclubName,
+//             joinedClubCountery: transfer.joinedCountery,
+//           }
+//         : null,
+//     });
+//   }
+
+//   return result.sort((a, b) => b.similarity - a.similarity).slice(0, 6);
+// };
+
+//===================================latest==================================
+// const similerPlayersAndGK = async (userId: string) => {
+//   const baseUser = await User.findById(userId);
+//   if (!baseUser) return [];
+
+//   const isGK = baseUser.role === 'gk';
+
+//   // ❌ baseStats check তুলে দেওয়া হয়েছে
+//   // আগে এখানে stats না থাকলে return [] হয়ে যেত
+
+//   // only same role users
+//   const candidates = await User.find({
+//     _id: { $ne: userId },
+//     role: baseUser.role,
+//   });
+
+//   const result: any[] = [];
+
+//   for (const user of candidates) {
+//     const match = isGK ? { gk: user._id } : { player: user._id };
+
+//     const stats = isGK
+//       ? await Gkstats.findOne(match)
+//       : await Attackingstat.findOne(match);
+
+//     // ❌ stats না থাকলেও বাদ দেওয়া হবে না
+//     // if (!stats) continue; — এটা তুলে দেওয়া হয়েছে
+
+//     const national = await National.findOne(match);
+//     const transfer = await TransferHistory.findOne(match).sort({ createdAt: -1 });
+
+//     /* ===== 1. POSITION — 33.33% ===== */
+//     let positionScore = 0;
+
+//     if (isGK) {
+//       positionScore = 100 / 3;
+//     } else {
+//       const basePos: string[] = baseUser.position ?? [];
+//       const candPos: string[] = user.position ?? [];
+
+//       if (basePos.length > 0 && candPos.length > 0) {
+//         const overlap = basePos.filter((p) => candPos.includes(p)).length;
+//         const total = Math.max(basePos.length, candPos.length);
+//         positionScore = (overlap / total) * (100 / 3);
+//       }
+//     }
+
+//     /* ===== 2. AGE — 33.33% ===== */
+//     let ageScore = 0;
+
+//     const baseAge = baseUser.age ?? null;
+//     const candAge = user.age ?? null;
+
+//     if (baseAge !== null && candAge !== null) {
+//       const diff = Math.abs(baseAge - candAge);
+//       ageScore = Math.max(0, 1 - diff / 10) * (100 / 3);
+//     }
+
+//     /* ===== 3. NATIONALITY — 33.33% ===== */
+//     let nationalityScore = 0;
+
+//     if (
+//       baseUser.nationality &&
+//       user.nationality &&
+//       baseUser.nationality.toLowerCase() === user.nationality.toLowerCase()
+//     ) {
+//       nationalityScore = 100 / 3;
+//     }
+
+//     /* ===== TOTAL ===== */
+//     const similarity = Math.round(positionScore + ageScore + nationalityScore);
+
+//     if (similarity < 1) continue;
+
+//     result.push({
+//       _id: user._id,
+//       name: `${user.firstName} ${user.lastName}`,
+//       profileImage: user.profileImage,
+//       age: user.age,
+//       nationality: user.nationality || null,
+//       position: user.position,
+//       teamName: user.teamName,
+//       similarity,
+
+//       ...(user.role === 'player' && stats && {
+//         goals: (stats as any).goals,
+//         assists: (stats as any).assists,
+//       }),
+//       ...(user.role === 'gk' && stats && {
+//         saves: (stats as any).saves,
+//         goalsConceded: (stats as any).goalsConceded,
+//       }),
+
+//       nationalTeam: national
+//         ? {
+//             teamName: national.teamName,
+//             match: national.match,
+//             goals: national.goals,
+//             flag: national.flag,
+//           }
+//         : null,
+
+//       lastTransfer: transfer
+//         ? {
+//             season: transfer.season,
+//             leftClub: transfer.leftClubName,
+//             joinedClub: transfer.joinedclubName,
+//             joinedClubCountery: transfer.joinedCountery,
+//           }
+//         : null,
+//     });
+//   }
+
+//   return result.sort((a, b) => b.similarity - a.similarity).slice(0, 6);
+// };
+
+//================================================================================
+
 const similerPlayersAndGK = async (userId: string) => {
   const baseUser = await User.findById(userId);
   if (!baseUser) return [];
 
   const isGK = baseUser.role === 'gk';
-  const baseMatch = isGK ? { gk: baseUser._id } : { player: baseUser._id };
 
-  // base stats required
-  const baseStats = isGK
-    ? await Gkstats.findOne(baseMatch)
-    : await Attackingstat.findOne(baseMatch);
-
-  if (!baseStats) return [];
-
-  // only same role users
+  // ✅ role filter নেই — সব user আসবে (শুধু নিজে বাদ)
   const candidates = await User.find({
     _id: { $ne: userId },
-    role: baseUser.role,
   });
 
   const result: any[] = [];
 
-  // weight distribution (exact 100%)
-  const WEIGHT = 100 / 3; // 33.3333
-
   for (const user of candidates) {
-    const match = isGK ? { gk: user._id } : { player: user._id };
+    const candIsGK = user.role === 'gk';
+    const match = candIsGK ? { gk: user._id } : { player: user._id };
 
-    const stats = isGK
+    const stats = candIsGK
       ? await Gkstats.findOne(match)
       : await Attackingstat.findOne(match);
-
-    if (!stats) continue;
 
     const national = await National.findOne(match);
     const transfer = await TransferHistory.findOne(match).sort({
       createdAt: -1,
     });
 
-    /* ================= SIMILARITY ================= */
-    let similarity = 0;
-
-    /* ---------- Position (33.33) ---------- */
+    /* ===== 1. POSITION — 33.33% ===== */
     let positionScore = 0;
 
-    if (isGK) {
-      // GK already filtered by role
-      positionScore = WEIGHT;
-    } else if (
-      baseUser.position?.some((p) => user.position?.includes(p))
-    ) {
-      positionScore = WEIGHT;
+    const basePos: string[] = baseUser.position ?? [];
+    const candPos: string[] = user.position ?? [];
+
+    if (basePos.length > 0 && candPos.length > 0) {
+      const overlap = basePos.filter((p) => candPos.includes(p)).length;
+      const total = Math.max(basePos.length, candPos.length);
+      positionScore = (overlap / total) * (100 / 3);
     }
 
-    similarity += positionScore;
-
-    /* ---------- Age (33.33) ---------- */
+    /* ===== 2. AGE — 33.33% ===== */
     let ageScore = 0;
 
     const baseAge = baseUser.age ?? null;
-    const compareAge = user.age ?? null;
+    const candAge = user.age ?? null;
 
-    if (baseAge !== null && compareAge !== null) {
-      const ageDiff = Math.abs(baseAge - compareAge);
-
-      // tolerance = 10 years (tweakable)
-      ageScore = Math.max(0, 1 - ageDiff / 10) * WEIGHT;
+    if (baseAge !== null && candAge !== null) {
+      const diff = Math.abs(baseAge - candAge);
+      ageScore = Math.max(0, 1 - diff / 10) * (100 / 3);
     }
 
-    similarity += ageScore;
-
-    /* ---------- Nationality (33.33) ---------- */
+    /* ===== 3. NATIONALITY — 33.33% ===== */
     let nationalityScore = 0;
 
     if (
       baseUser.nationality &&
       user.nationality &&
-      baseUser.nationality.toLowerCase() ===
-        user.nationality.toLowerCase()
+      baseUser.nationality.toLowerCase() === user.nationality.toLowerCase()
     ) {
-      nationalityScore = WEIGHT;
+      nationalityScore = 100 / 3;
     }
 
-    similarity += nationalityScore;
+    /* ===== TOTAL ===== */
+    const similarity = Math.round(positionScore + ageScore + nationalityScore);
 
-    similarity = Math.round(similarity);
+    if (similarity < 1) continue;
 
-    // minimum similarity filter (optional)
-    if (similarity < 30) continue;
-
-    /* ================= FINAL OUTPUT ================= */
     result.push({
       _id: user._id,
       name: `${user.firstName} ${user.lastName}`,
@@ -575,22 +808,20 @@ const similerPlayersAndGK = async (userId: string) => {
       nationality: user.nationality || null,
       position: user.position,
       teamName: user.teamName,
-
+      role: user.role,
       similarity,
 
-      // Player specific
-      ...(user.role === 'player' && {
-        goals: (stats as any).goals,
-        assists: (stats as any).assists,
-      }),
+      ...(user.role === 'player' &&
+        stats && {
+          goals: (stats as any).goals,
+          assists: (stats as any).assists,
+        }),
+      ...(user.role === 'gk' &&
+        stats && {
+          saves: (stats as any).saves,
+          goalsConceded: (stats as any).goalsConceded,
+        }),
 
-      // GK specific
-      ...(user.role === 'gk' && {
-        saves: (stats as any).saves,
-        goalsConceded: (stats as any).goalsConceded,
-      }),
-
-      // National team
       nationalTeam: national
         ? {
             teamName: national.teamName,
@@ -600,7 +831,6 @@ const similerPlayersAndGK = async (userId: string) => {
           }
         : null,
 
-      // Latest transfer
       lastTransfer: transfer
         ? {
             season: transfer.season,
