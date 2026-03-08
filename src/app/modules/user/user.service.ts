@@ -463,16 +463,122 @@ const unfollowUser = async (userId: string, targetUserId: string) => {
 
 //================================================================================
 
+// const similerPlayersAndGK = async (userId: string) => {
+//   const baseUser = await User.findById(userId);
+//   if (!baseUser) return [];
+
+//   const isGK = baseUser.role === 'gk';
+
+//   // ✅ role filter নেই — সব user আসবে (শুধু নিজে বাদ)
+//   const candidates = await User.find({
+//     _id: { $ne: userId },
+//   });
+
+//   const result: any[] = [];
+
+//   for (const user of candidates) {
+//     const candIsGK = user.role === 'gk';
+//     const match = candIsGK ? { gk: user._id } : { player: user._id };
+
+//     const stats = candIsGK
+//       ? await Gkstats.findOne(match)
+//       : await Attackingstat.findOne(match);
+
+//     const national = await National.findOne(match);
+//     const transfer = await TransferHistory.findOne(match).sort({
+//       createdAt: -1,
+//     });
+
+//     /* ===== 1. POSITION — 33.33% ===== */
+//     let positionScore = 0;
+
+//     const basePos: string[] = baseUser.position ?? [];
+//     const candPos: string[] = user.position ?? [];
+
+//     if (basePos.length > 0 && candPos.length > 0) {
+//       const overlap = basePos.filter((p) => candPos.includes(p)).length;
+//       const total = Math.max(basePos.length, candPos.length);
+//       positionScore = (overlap / total) * (100 / 3);
+//     }
+
+//     /* ===== 2. AGE — 33.33% ===== */
+//     let ageScore = 0;
+
+//     const baseAge = baseUser.age ?? null;
+//     const candAge = user.age ?? null;
+
+//     if (baseAge !== null && candAge !== null) {
+//       const diff = Math.abs(baseAge - candAge);
+//       ageScore = Math.max(0, 1 - diff / 10) * (100 / 3);
+//     }
+
+//     /* ===== 3. NATIONALITY — 33.33% ===== */
+//     let nationalityScore = 0;
+
+//     if (
+//       baseUser.nationality &&
+//       user.nationality &&
+//       baseUser.nationality.toLowerCase() === user.nationality.toLowerCase()
+//     ) {
+//       nationalityScore = 100 / 3;
+//     }
+
+//     /* ===== TOTAL ===== */
+//     const similarity = Math.round(positionScore + ageScore + nationalityScore);
+
+//     if (similarity < 1) continue;
+
+//     result.push({
+//       _id: user._id,
+//       name: `${user.firstName} ${user.lastName}`,
+//       profileImage: user.profileImage,
+//       age: user.age,
+//       nationality: user.nationality || null,
+//       position: user.position,
+//       teamName: user.teamName,
+//       role: user.role,
+//       similarity,
+
+//       ...(user.role === 'player' &&
+//         stats && {
+//           goals: (stats as any).goals,
+//           assists: (stats as any).assists,
+//         }),
+//       ...(user.role === 'gk' &&
+//         stats && {
+//           saves: (stats as any).saves,
+//           goalsConceded: (stats as any).goalsConceded,
+//         }),
+
+//       nationalTeam: national
+//         ? {
+//             teamName: national.teamName,
+//             match: national.match,
+//             goals: national.goals,
+//             flag: national.flag,
+//           }
+//         : null,
+
+//       lastTransfer: transfer
+//         ? {
+//             season: transfer.season,
+//             leftClub: transfer.leftClubName,
+//             joinedClub: transfer.joinedclubName,
+//             joinedClubCountery: transfer.joinedCountery,
+//           }
+//         : null,
+//     });
+//   }
+
+//   return result.sort((a, b) => b.similarity - a.similarity).slice(0, 6);
+// };
+
+//================================================================================final code ================================
 const similerPlayersAndGK = async (userId: string) => {
   const baseUser = await User.findById(userId);
   if (!baseUser) return [];
 
-  const isGK = baseUser.role === 'gk';
-
-  // ✅ role filter নেই — সব user আসবে (শুধু নিজে বাদ)
-  const candidates = await User.find({
-    _id: { $ne: userId },
-  });
+  const candidates = await User.find({ _id: { $ne: userId } });
 
   const result: any[] = [];
 
@@ -480,53 +586,39 @@ const similerPlayersAndGK = async (userId: string) => {
     const candIsGK = user.role === 'gk';
     const match = candIsGK ? { gk: user._id } : { player: user._id };
 
+    /* ===== 1. AGE — exact match ===== */
+    const ageMatch =
+      baseUser.age != null &&
+      user.age != null &&
+      baseUser.age === user.age;
+
+    /* ===== 2. POSITION — যেকোনো একটা মিললেই match ===== */
+    const basePos: string[] = baseUser.position ?? [];
+    const candPos: string[] = user.position ?? [];
+    const positionMatch =
+      basePos.length > 0 &&
+      candPos.length > 0 &&
+      basePos.some((p) => candPos.includes(p));
+
+    /* ===== 3. NATIONALITY — exact match ===== */
+    const nationalityMatch =
+      !!baseUser.nationality &&
+      !!user.nationality &&
+      baseUser.nationality.toLowerCase() === user.nationality.toLowerCase();
+
+    /* ===== TOTAL ===== */
+    const matchCount = [ageMatch, positionMatch, nationalityMatch].filter(Boolean).length;
+
+    if (matchCount === 0) continue;
+
+    const similarity = Math.round((matchCount / 3) * 100); // 1→33, 2→67, 3→100
+
     const stats = candIsGK
       ? await Gkstats.findOne(match)
       : await Attackingstat.findOne(match);
 
     const national = await National.findOne(match);
-    const transfer = await TransferHistory.findOne(match).sort({
-      createdAt: -1,
-    });
-
-    /* ===== 1. POSITION — 33.33% ===== */
-    let positionScore = 0;
-
-    const basePos: string[] = baseUser.position ?? [];
-    const candPos: string[] = user.position ?? [];
-
-    if (basePos.length > 0 && candPos.length > 0) {
-      const overlap = basePos.filter((p) => candPos.includes(p)).length;
-      const total = Math.max(basePos.length, candPos.length);
-      positionScore = (overlap / total) * (100 / 3);
-    }
-
-    /* ===== 2. AGE — 33.33% ===== */
-    let ageScore = 0;
-
-    const baseAge = baseUser.age ?? null;
-    const candAge = user.age ?? null;
-
-    if (baseAge !== null && candAge !== null) {
-      const diff = Math.abs(baseAge - candAge);
-      ageScore = Math.max(0, 1 - diff / 10) * (100 / 3);
-    }
-
-    /* ===== 3. NATIONALITY — 33.33% ===== */
-    let nationalityScore = 0;
-
-    if (
-      baseUser.nationality &&
-      user.nationality &&
-      baseUser.nationality.toLowerCase() === user.nationality.toLowerCase()
-    ) {
-      nationalityScore = 100 / 3;
-    }
-
-    /* ===== TOTAL ===== */
-    const similarity = Math.round(positionScore + ageScore + nationalityScore);
-
-    if (similarity < 1) continue;
+    const transfer = await TransferHistory.findOne(match).sort({ createdAt: -1 });
 
     result.push({
       _id: user._id,
@@ -539,16 +631,14 @@ const similerPlayersAndGK = async (userId: string) => {
       role: user.role,
       similarity,
 
-      ...(user.role === 'player' &&
-        stats && {
-          goals: (stats as any).goals,
-          assists: (stats as any).assists,
-        }),
-      ...(user.role === 'gk' &&
-        stats && {
-          saves: (stats as any).saves,
-          goalsConceded: (stats as any).goalsConceded,
-        }),
+      ...(user.role === 'player' && stats && {
+        goals: (stats as any).goals,
+        assists: (stats as any).assists,
+      }),
+      ...(user.role === 'gk' && stats && {
+        saves: (stats as any).saves,
+        goalsConceded: (stats as any).goalsConceded,
+      }),
 
       nationalTeam: national
         ? {
