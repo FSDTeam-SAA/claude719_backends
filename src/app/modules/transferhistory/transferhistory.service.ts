@@ -18,22 +18,22 @@ const createTransferhistory = async (
   if (!user) throw new AppError(404, 'user is not found');
 
   if (leftClub) {
-    const leftClubUrl = await fileUploader.uploadToCloudinary(leftClub);
+    const leftClubUrl = await fileUploader.uploadToS3(leftClub);
     payload.leftClub = leftClubUrl.url;
   }
   if (leftCountery) {
-    const leftCounteryUrl = await fileUploader.uploadToCloudinary(leftCountery);
+    const leftCounteryUrl = await fileUploader.uploadToS3(leftCountery);
     payload.leftCountery = leftCounteryUrl.url;
   }
 
   if (joinedClub) {
-    const joinedClubUrl = await fileUploader.uploadToCloudinary(joinedClub);
+    const joinedClubUrl = await fileUploader.uploadToS3(joinedClub);
     payload.joinedClub = joinedClubUrl.url;
   }
 
   if (joinedCountery) {
     const joinedCounteryUrl =
-      await fileUploader.uploadToCloudinary(joinedCountery);
+      await fileUploader.uploadToS3(joinedCountery);
     payload.joinedCountery = joinedCounteryUrl.url;
   }
 
@@ -132,22 +132,22 @@ const updateTransferhistory = async (
   joinedCountery?: Express.Multer.File,
 ) => {
   if (leftClub) {
-    const leftClubUrl = await fileUploader.uploadToCloudinary(leftClub);
+    const leftClubUrl = await fileUploader.uploadToS3(leftClub);
     payload.leftClub = leftClubUrl.url;
   }
   if (leftCountery) {
-    const leftCounteryUrl = await fileUploader.uploadToCloudinary(leftCountery);
+    const leftCounteryUrl = await fileUploader.uploadToS3(leftCountery);
     payload.leftCountery = leftCounteryUrl.url;
   }
 
   if (joinedClub) {
-    const joinedClubUrl = await fileUploader.uploadToCloudinary(joinedClub);
+    const joinedClubUrl = await fileUploader.uploadToS3(joinedClub);
     payload.joinedClub = joinedClubUrl.url;
   }
 
   if (joinedCountery) {
     const joinedCounteryUrl =
-      await fileUploader.uploadToCloudinary(joinedCountery);
+      await fileUploader.uploadToS3(joinedCountery);
     payload.joinedCountery = joinedCounteryUrl.url;
   }
 

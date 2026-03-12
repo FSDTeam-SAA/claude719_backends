@@ -15,7 +15,7 @@ const createNational = async (
   if (!user) throw new AppError(404, 'user is not found');
 
   if (flag) {
-    const leftClubUrl = await fileUploader.uploadToCloudinary(flag);
+    const leftClubUrl = await fileUploader.uploadToS3(flag);
     payload.flag = leftClubUrl.url;
   }
 
@@ -111,7 +111,7 @@ const updateNational = async (
   flag?: Express.Multer.File,
 ) => {
   if (flag) {
-    const leftClubUrl = await fileUploader.uploadToCloudinary(flag);
+    const leftClubUrl = await fileUploader.uploadToS3(flag);
     payload.flag = leftClubUrl.url;
   }
 

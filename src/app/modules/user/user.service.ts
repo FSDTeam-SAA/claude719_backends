@@ -136,7 +136,7 @@ const updateUserById = async (
     throw new AppError(404, 'User not found');
   }
   if (file) {
-    const uploadProfile = await fileUploader.uploadToCloudinary(file);
+    const uploadProfile = await fileUploader.uploadToS3(file);
     if (!uploadProfile?.url) {
       throw new AppError(400, 'Failed to upload profile image');
     }
@@ -146,7 +146,7 @@ const updateUserById = async (
     if (videos && videos.length > 0) {
       const videoUpload = await Promise.all(
         videos.map(async (video) => {
-          const uploadVideo = await fileUploader.uploadToCloudinary(video);
+          const uploadVideo = await fileUploader.uploadToS3(video);
           if (!uploadVideo?.url) {
             throw new AppError(400, 'Failed to upload video');
           }
@@ -244,7 +244,7 @@ const updateMyProfile = async (
   //   throw new AppError(403, 'Please subscribe to access this feature');
   // }
   if (file) {
-    const uploadProfile = await fileUploader.uploadToCloudinary(file);
+    const uploadProfile = await fileUploader.uploadToS3(file);
     if (!uploadProfile?.url) {
       throw new AppError(400, 'Failed to upload profile image');
     }
@@ -253,7 +253,7 @@ const updateMyProfile = async (
   if (videos && videos.length > 0) {
     const videoUpload = await Promise.all(
       videos.map(async (video) => {
-        const uploadVideo = await fileUploader.uploadToCloudinary(video);
+        const uploadVideo = await fileUploader.uploadToS3(video);
         if (!uploadVideo?.url) {
           throw new AppError(400, 'Failed to upload video');
         }
@@ -280,7 +280,7 @@ const videoAdd = async (id: string, videos: Express.Multer.File[]) => {
   if (videos && videos.length > 0) {
     const videoUpload = await Promise.all(
       videos.map(async (video) => {
-        const uploadVideo = await fileUploader.uploadToCloudinary(video);
+        const uploadVideo = await fileUploader.uploadToS3(video);
         if (!uploadVideo?.url) {
           throw new AppError(400, 'Failed to upload video');
         }

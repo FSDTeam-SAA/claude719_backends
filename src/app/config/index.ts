@@ -41,7 +41,7 @@ export default {
     webhookId: process.env.PAYPAL_WEBHOOK_ID,
   },
   frontendUrl: process.env.FRONTEND_URL,
-  backendUrl: process.env.BACKEND_URL,  
+  backendUrl: process.env.BACKEND_URL,
   google: {
     clientId: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -50,5 +50,12 @@ export default {
     window: process.env.RATE_LIMIT_WINDOW,
     max: process.env.RATE_LIMIT_MAX,
     delay: process.env.RATE_LIMIT_DELAY,
+  },
+
+  aws: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: process.env.AWS_REGION,
+    bucket: process.env.AWS_BUCKET_NAME,
   },
 };
