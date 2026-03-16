@@ -4,6 +4,7 @@ import auth from '../../middlewares/auth';
 
 import { userRole } from './user.constant';
 import { fileUploader } from '../../helper/fileUploder';
+import videoLimitMiddleware from '../../helper/videoLimitMiddleware';
 
 const router = express.Router();
 
@@ -21,6 +22,7 @@ router.put(
     { name: 'profileImage', maxCount: 1 },
     { name: 'playingVideo', maxCount: 5 },
   ]),
+  videoLimitMiddleware('playingVideo'),
   userController.updateMyProfile,
 );
 
@@ -28,6 +30,7 @@ router.put(
   '/video-add',
   auth(userRole.admin, userRole.player, userRole.gk),
   fileUploader.upload.array('playingVideo', 5),
+  videoLimitMiddleware('playingVideo'),
   userController.videoAdd,
 );
 router.delete(
