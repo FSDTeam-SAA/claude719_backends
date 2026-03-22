@@ -15,7 +15,7 @@ export interface IDefensive {
   shotBlocked?: number;
   crossBlocked?: number;
   mistakes?: number;
-  aerialDuels?: number;
-  phvsicalDuels?: number;
+  aerialDuels?: string;
+  phvsicalDuels?: string;
   ownGoals?: number;
 }

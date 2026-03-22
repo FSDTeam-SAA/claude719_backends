@@ -7,4 +7,5 @@ export interface IRating {
   position?: string[];
   gamesNumber?: number;
   minutes?: number;
+  date?: Date;
 }
