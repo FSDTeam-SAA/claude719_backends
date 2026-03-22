@@ -26,6 +26,10 @@ const ratingSchema = new mongoose.Schema<IRating>(
     minutes: {
       type: Number,
     },
+    date: {
+      type: Date,
+      default: Date.now,
+    },
   },
   { timestamps: true },
 );

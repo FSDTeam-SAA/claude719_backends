@@ -23,8 +23,8 @@ const defensiveSchema = new mongoose.Schema<IDefensive>(
     shotBlocked: { type: Number },
     crossBlocked: { type: Number },
     mistakes: { type: Number },
-    aerialDuels: { type: Number },
-    phvsicalDuels: { type: Number },
+    aerialDuels: { type: String },
+    phvsicalDuels: { type: String },
     ownGoals: { type: Number },
   },
   {

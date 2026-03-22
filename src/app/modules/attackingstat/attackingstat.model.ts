@@ -14,7 +14,7 @@ const attackingstatSchema = new mongoose.Schema<IAttackingstat>(
     shootingAccuracy: { type: String, required: true },
     shotsOffTarget: { type: Number, required: true },
     passesAccuracy: { type: String, required: true },
-    takeOn: { type: Number, required: true },
+    takeOn: { type: String, required: true },
   },
   { timestamps: true },
 );
