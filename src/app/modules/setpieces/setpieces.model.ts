@@ -5,10 +5,10 @@ const setpiecesSchema = new mongoose.Schema<ISetpieces>(
   {
     player: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     gk: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    freekicks: { type: Number, default: 0 },
-    freekicksShots: { type: Number, default: 0 },
-    freekicksShotsonTarget: { type: Number, default: 0 },
-    penaltyKicks: { type: Number, default: 0 },
+    freekicks: { type: String},
+    freekicksShots: { type: String },
+    freekicksShotsonTarget: { type: String },
+    penaltyKicks: { type: String},
   },
   { timestamps: true },
 );
