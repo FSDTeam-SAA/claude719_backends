@@ -5,8 +5,8 @@ export interface INational {
   gk?: Types.ObjectId;
   flag?: string;
   teamName?: string;
-  goals?: number;
+  goals?: string;
   debut?: Date;
-  match?: number;
+  match?: string;
   category?: string;
 }

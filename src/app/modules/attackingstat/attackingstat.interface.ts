@@ -3,14 +3,14 @@ import { Types } from 'mongoose';
 export interface IAttackingstat {
   player?: Types.ObjectId;
   gk?: Types.ObjectId;
-  goals: number;
-  assists: number;
-  shotsNsidePr: number;
-  shotsOutsidePa: number;
-  totalShots: number;
-  shotsOnTarget: number;
+  goals: string;
+  assists: string;
+  shotsNsidePr: string;
+  shotsOutsidePa: string;
+  totalShots: string;
+  shotsOnTarget: string;
   shootingAccuracy: string;
-  shotsOffTarget: number;
+  shotsOffTarget: string;
   passesAccuracy: string;
   takeOn: string;
 }
