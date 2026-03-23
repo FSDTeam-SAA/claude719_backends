@@ -13,12 +13,10 @@ const TransferHistorySchema = new Schema<ITransferhistory>(
     },
     season: {
       type: String,
-      required: true,
       trim: true,
     },
     date: {
       type: Date,
-      required: true,
       default: Date.now,
     },
 
@@ -41,11 +39,9 @@ const TransferHistorySchema = new Schema<ITransferhistory>(
     },
     joinedClub: {
       type: String,
-
     },
     joinedCountery: {
       type: String,
-
     },
   },
   {
