@@ -23,11 +23,11 @@ const nationalSchema = new mongoose.Schema<INational>(
     },
     match: {
       type: Number,
-      default: 0,
+      default: String,
     },
     goals: {
       type: Number,
-      default: 0,
+      default: String,
     },
     category: {
       type: String,
