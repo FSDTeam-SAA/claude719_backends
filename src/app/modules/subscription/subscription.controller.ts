@@ -22,6 +22,7 @@ const getAllSubscription = catchAsync(async (req, res) => {
     'interval',
     'features',
     'status',
+    'paymentType',
   ]);
 
   const options = pick(req.query, ['limit', 'page', 'sortBy', 'sortOrder']);
