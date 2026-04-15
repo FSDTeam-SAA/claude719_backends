@@ -128,6 +128,38 @@ const payEvaluationSubscription = catchAsync(async (req, res) => {
   });
 });
 
+const payDevelopmentSubscription = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const result = await SubscriptionService.payDevelopmentSubscription(
+    req.user?.id,
+    id!,
+  );
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Development subscription payment initiated successfully',
+    data: result,
+  });
+});
+
+const payCombine2026Subscription = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const result = await SubscriptionService.payCombine2026Subscription(
+    req.user?.id,
+    id!,
+  );
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Combine 2026 subscription payment initiated successfully',
+    data: result,
+  });
+});
+
 export const SubscriptionController = {
   createSubscription,
   getAllSubscription,
@@ -138,4 +170,6 @@ export const SubscriptionController = {
   payIndividualSubscription,
   payTeamSubscription,
   payEvaluationSubscription,
+  payDevelopmentSubscription,
+  payCombine2026Subscription,
 };

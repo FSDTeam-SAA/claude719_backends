@@ -625,10 +625,7 @@ const payEvaluationSubscription = async (
   }
 
   if (subscription.paymentType !== 'Evaluation') {
-    throw new AppError(
-      400,
-      'This subscription is not for evaluation users.',
-    );
+    throw new AppError(400, 'This subscription is not for evaluation users.');
   }
 
   if (subscription.status !== 'active') {
@@ -750,6 +747,274 @@ const payEvaluationSubscription = async (
   }
 };
 
+// Pay Development Subscription
+const payDevelopmentSubscription = async (
+  userId: string,
+  subscriptionId: string,
+) => {
+  console.log('💳 Processing development payment...');
+  console.log('   User ID:', userId);
+  console.log('   Subscription ID:', subscriptionId);
+
+  // 1. Validate User
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(404, 'User not found');
+  }
+
+  // 2. Validate Subscription
+  const subscription = await Subscription.findById(subscriptionId);
+  if (!subscription) {
+    throw new AppError(404, 'Subscription not found');
+  }
+
+  if (subscription.paymentType !== 'Development') {
+    throw new AppError(400, 'This subscription is not a Development subscription.');
+  }
+
+  if (subscription.status !== 'active') {
+    throw new AppError(400, 'This subscription is not currently available');
+  }
+
+  if (!subscription.price || subscription.price <= 0) {
+    throw new AppError(400, 'Invalid subscription price');
+  }
+
+  // 3. Prevent duplicate purchase
+  if (user.isDevelopment) {
+    throw new AppError(
+      400,
+      'You already purchased the development subscription.',
+    );
+  }
+
+  // 4. Get PayPal Access Token
+  const accessToken = await getPayPalAccessToken();
+
+  // 5. Create PayPal Order
+  const orderData = {
+    intent: 'CAPTURE',
+    purchase_units: [
+      {
+        amount: {
+          currency_code: subscription.currency?.toUpperCase() || 'USD',
+          value: subscription.price.toFixed(2),
+        },
+        description: `${subscription.title} - Development Subscription`,
+        custom_id: `development_user_${userId}_sub_${subscriptionId}`,
+      },
+    ],
+    application_context: {
+      return_url: `${config.frontendUrl}/success?type=development&userId=${userId}&subscriptionId=${subscriptionId}`,
+      cancel_url: `${config.frontendUrl}/cancel?type=development`,
+      user_action: 'PAY_NOW',
+      brand_name: 'Your App Name',
+      landing_page: 'BILLING',
+      shipping_preference: 'NO_SHIPPING',
+    },
+  };
+
+  try {
+    console.log('📤 Creating PayPal development order...');
+
+    const response = await axios.post(
+      `${PAYPAL_API_BASE}/v2/checkout/orders`,
+      orderData,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          'PayPal-Request-Id': `development-${userId}-${Date.now()}`,
+        },
+      },
+    );
+
+    const order = response.data;
+
+    console.log('✅ PayPal development order created successfully');
+    console.log('   Order ID:', order.id);
+
+    // 6. Save Payment Record
+    const payment = await Payment.create({
+      user: user._id,
+      subscription: subscription._id,
+      paypalOrderId: order.id,
+      amount: subscription.price,
+      currency: subscription.currency || 'usd',
+      paymentType: subscription.paymentType,
+      status: 'pending',
+    });
+
+    console.log('💾 Payment record created:', payment._id);
+
+    // 7. Extract Approval URL
+    const approvalUrl = order.links?.find(
+      (link: any) => link.rel === 'approve',
+    )?.href;
+
+    if (!approvalUrl) {
+      throw new AppError(500, 'PayPal approval URL not found');
+    }
+
+    return {
+      success: true,
+      orderId: order.id,
+      paymentId: payment._id.toString(),
+      approvalUrl,
+      amount: subscription.price,
+      currency: subscription.currency?.toUpperCase() || 'USD',
+      subscriptionTitle: subscription.title,
+      message: 'Redirect user to approvalUrl to complete development payment',
+    };
+  } catch (error: any) {
+    console.error('❌ PayPal Development Order Creation Error:');
+    console.error('   Status:', error.response?.status);
+    console.error('   Error:', error.response?.data);
+    console.error('   Message:', error.message);
+
+    throw new AppError(
+      500,
+      `PayPal development order creation failed: ${
+        error.response?.data?.message || error.message
+      }`,
+    );
+  }
+};
+
+// Pay Combine 2026 Subscription
+const payCombine2026Subscription = async (
+  userId: string,
+  subscriptionId: string,
+) => {
+  console.log('💳 Processing Combine 2026 payment...');
+  console.log('   User ID:', userId);
+  console.log('   Subscription ID:', subscriptionId);
+
+  // 1. Validate User
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(404, 'User not found');
+  }
+
+  // 2. Validate Subscription
+  const subscription = await Subscription.findById(subscriptionId);
+  if (!subscription) {
+    throw new AppError(404, 'Subscription not found');
+  }
+
+  if (subscription.paymentType !== 'Combine_2026') {
+    throw new AppError(400, 'This subscription is not a Combine 2026 subscription.');
+  }
+
+  if (subscription.status !== 'active') {
+    throw new AppError(400, 'This subscription is not currently available');
+  }
+
+  if (!subscription.price || subscription.price <= 0) {
+    throw new AppError(400, 'Invalid subscription price');
+  }
+
+  // 3. Prevent duplicate purchase
+  if (user.isCombine2026) {
+    throw new AppError(
+      400,
+      'You already purchased the Combine 2026 subscription.',
+    );
+  }
+
+  // 4. Get PayPal Access Token
+  const accessToken = await getPayPalAccessToken();
+
+  // 5. Create PayPal Order
+  const orderData = {
+    intent: 'CAPTURE',
+    purchase_units: [
+      {
+        amount: {
+          currency_code: subscription.currency?.toUpperCase() || 'USD',
+          value: subscription.price.toFixed(2),
+        },
+        description: `${subscription.title} - Combine 2026 Subscription`,
+        custom_id: `combine2026_user_${userId}_sub_${subscriptionId}`,
+      },
+    ],
+    application_context: {
+      return_url: `${config.frontendUrl}/success?type=combine_2026&userId=${userId}&subscriptionId=${subscriptionId}`,
+      cancel_url: `${config.frontendUrl}/cancel?type=combine_2026`,
+      user_action: 'PAY_NOW',
+      brand_name: 'Your App Name',
+      landing_page: 'BILLING',
+      shipping_preference: 'NO_SHIPPING',
+    },
+  };
+
+  try {
+    console.log('📤 Creating PayPal Combine 2026 order...');
+
+    const response = await axios.post(
+      `${PAYPAL_API_BASE}/v2/checkout/orders`,
+      orderData,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          'PayPal-Request-Id': `combine2026-${userId}-${Date.now()}`,
+        },
+      },
+    );
+
+    const order = response.data;
+
+    console.log('✅ PayPal Combine 2026 order created successfully');
+    console.log('   Order ID:', order.id);
+
+    // 6. Save Payment Record
+    const payment = await Payment.create({
+      user: user._id,
+      subscription: subscription._id,
+      paypalOrderId: order.id,
+      amount: subscription.price,
+      currency: subscription.currency || 'usd',
+      paymentType: subscription.paymentType,
+      status: 'pending',
+    });
+
+    console.log('💾 Payment record created:', payment._id);
+
+    // 7. Extract Approval URL
+    const approvalUrl = order.links?.find(
+      (link: any) => link.rel === 'approve',
+    )?.href;
+
+    if (!approvalUrl) {
+      throw new AppError(500, 'PayPal approval URL not found');
+    }
+
+    return {
+      success: true,
+      orderId: order.id,
+      paymentId: payment._id.toString(),
+      approvalUrl,
+      amount: subscription.price,
+      currency: subscription.currency?.toUpperCase() || 'USD',
+      subscriptionTitle: subscription.title,
+      message: 'Redirect user to approvalUrl to complete Combine 2026 payment',
+    };
+  } catch (error: any) {
+    console.error('❌ PayPal Combine 2026 Order Creation Error:');
+    console.error('   Status:', error.response?.status);
+    console.error('   Error:', error.response?.data);
+    console.error('   Message:', error.message);
+
+    throw new AppError(
+      500,
+      `PayPal Combine 2026 order creation failed: ${
+        error.response?.data?.message || error.message
+      }`,
+    );
+  }
+};
+
 export const SubscriptionService = {
   createSubscription,
   getAllSubscription,
@@ -761,4 +1026,6 @@ export const SubscriptionService = {
   payTeamSubscription,
   capturePayment,
   payEvaluationSubscription,
+  payDevelopmentSubscription,
+  payCombine2026Subscription,
 };
