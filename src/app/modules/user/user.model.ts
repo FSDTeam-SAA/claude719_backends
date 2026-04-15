@@ -162,6 +162,14 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+    isDevelopment: {
+      type: Boolean,
+      default: false,
+    },
+    isCombine2026: {
+      type: Boolean,
+      default: false,
+    },
 
     // admin profile
     designation: {
