@@ -162,6 +162,26 @@ const handlePaymentCaptured = async (resource: any) => {
     });
     console.log(`✅ User evaluation subscription activated`);
   }
+
+  if (payment.paymentType === 'Development') {
+    await User.findByIdAndUpdate(payment.user, {
+      isSubscription: true,
+      isDevelopment: true,
+      subscription: subscription._id,
+      subscriptionExpiry: expiry,
+    });
+    console.log(`✅ User development subscription activated`);
+  }
+
+  if (payment.paymentType === 'Combine_2026') {
+    await User.findByIdAndUpdate(payment.user, {
+      isSubscription: true,
+      isCombine2026: true,
+      subscription: subscription._id,
+      subscriptionExpiry: expiry,
+    });
+    console.log(`✅ User Combine 2026 subscription activated`);
+  }
 };
 
 const handlePaymentFailed = async (resource: any) => {
