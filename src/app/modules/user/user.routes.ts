@@ -12,12 +12,12 @@ router.post('/create-user', auth(userRole.admin), userController.createUser);
 
 router.get(
   '/profile',
-  auth(userRole.admin, userRole.player, userRole.gk),
+  auth(userRole.admin, userRole.player, userRole.gk, userRole.coach, userRole.guest),
   userController.profile,
 );
 router.put(
   '/profile',
-  auth(userRole.admin, userRole.player, userRole.gk),
+  auth(userRole.admin, userRole.player, userRole.gk, userRole.coach, userRole.guest),
   fileUploader.upload.fields([
     { name: 'profileImage', maxCount: 1 },
     { name: 'playingVideo', maxCount: 5 },
@@ -28,14 +28,14 @@ router.put(
 
 router.put(
   '/video-add',
-  auth(userRole.admin, userRole.player, userRole.gk),
+  auth(userRole.admin, userRole.player, userRole.gk, userRole.coach, userRole.guest),
   fileUploader.upload.array('playingVideo', 5),
   videoLimitMiddleware('playingVideo'),
   userController.videoAdd,
 );
 router.delete(
   '/video-remove',
-  auth(userRole.admin, userRole.player, userRole.gk),
+  auth(userRole.admin, userRole.player, userRole.gk, userRole.coach, userRole.guest),
   userController.removedVideo,
 );
 

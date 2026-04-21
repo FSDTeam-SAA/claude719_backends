@@ -41,7 +41,7 @@ const userSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ['player', 'admin', 'gk', 'coach'],
+      enum: ['player', 'admin', 'gk', 'coach', 'guest'],
       required: true,
     },
     provider: {

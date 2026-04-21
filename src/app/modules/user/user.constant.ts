@@ -4,4 +4,5 @@ export const userRole = {
   admin: 'admin',
   gk: 'gk',
   coach: 'coach',
+  guest: 'guest',
 } as const;
