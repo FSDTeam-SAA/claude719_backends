@@ -46,7 +46,7 @@ const getAllUser = async (params: any, options: IOption) => {
   ];
 
   andCondition.push({
-    role: { $in: ['player', 'gk'] },
+    role: { $in: ['player', 'gk','guest'] },
   });
 
   if (searchTerm) {
