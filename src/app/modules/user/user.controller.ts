@@ -36,6 +36,29 @@ const getAllUser = catchAsync(async (req, res) => {
     data: result.data,
   });
 });
+const getAllGuest = catchAsync(async (req, res) => {
+  const filters = pick(req.query, [
+    'searchTerm',
+    'firstName',
+    'lastName',
+    'email',
+    'role',
+    'citizenship',
+    'nationality',
+    'position',
+    'category',
+    'jerseyNumber',
+  ]);
+  const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
+  const result = await userService.getAllGuest(filters, options);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'User fetched successfully',
+    meta: result.meta,
+    data: result.data,
+  });
+});
 
 const getUserById = catchAsync(async (req, res) => {
   const { id } = req.params;
@@ -192,4 +215,5 @@ export const userController = {
   removedVideo,
   followUser,
   unfollowUser,
+  getAllGuest,
 };
