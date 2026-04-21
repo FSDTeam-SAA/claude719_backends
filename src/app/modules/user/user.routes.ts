@@ -40,6 +40,7 @@ router.delete(
 );
 
 router.get('/all-user', userController.getAllUser);
+router.get('/all-guest', userController.getAllGuest);
 router.get(
   '/detail/:id',
   // auth(userRole.admin),
