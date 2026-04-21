@@ -175,7 +175,7 @@ const googleLogin = async (idToken: string, role?: string) => {
     if (!user) {
       console.log('🆕 New Google user detected');
 
-      const validRoles = ['player', 'admin', 'gk'] as const;
+      const validRoles = ['player', 'admin', 'gk', 'coach', 'guest'] as const;
       const userRole =
         role && validRoles.includes(role as any) ? role : 'player';
 
