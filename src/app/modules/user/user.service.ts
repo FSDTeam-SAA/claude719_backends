@@ -46,7 +46,66 @@ const getAllUser = async (params: any, options: IOption) => {
   ];
 
   andCondition.push({
-    role: { $in: ['player', 'gk','guest'] },
+    role: { $in: ['player', 'gk'] },
+  });
+
+  if (searchTerm) {
+    andCondition.push({
+      $or: userSearchableFields.map((field) => ({
+        [field]: { $regex: searchTerm, $options: 'i' },
+      })),
+    });
+  }
+
+  if (Object.keys(filterData).length) {
+    andCondition.push({
+      $and: Object.entries(filterData).map(([field, value]) => ({
+        [field]: value,
+      })),
+    });
+  }
+
+  const whereCondition = andCondition.length > 0 ? { $and: andCondition } : {};
+
+  const result = await User.find(whereCondition)
+    .skip(skip)
+    .limit(limit)
+    .sort({ [sortBy]: sortOrder } as any);
+
+  if (!result) {
+    throw new AppError(404, 'Users not found');
+  }
+
+  const total = await User.countDocuments(whereCondition);
+
+  return {
+    data: result,
+    meta: {
+      total,
+      page,
+      limit,
+    },
+  };
+};
+const getAllGuest = async (params: any, options: IOption) => {
+  const { page, limit, skip, sortBy, sortOrder } = pagination(options);
+  const { searchTerm, ...filterData } = params;
+
+  const andCondition: any[] = [];
+  const userSearchableFields = [
+    'firstName',
+    'lastName',
+    'email',
+    'role',
+    'citizenship',
+    'nationality',
+    'position',
+    'category',
+    'jerseyNumber',
+  ];
+
+  andCondition.push({
+    role: { $in: ['guest'] },
   });
 
   if (searchTerm) {
@@ -360,9 +419,7 @@ const similerPlayersAndGK = async (userId: string) => {
 
     /* ===== 1. AGE — exact match ===== */
     const ageMatch =
-      baseUser.age != null &&
-      user.age != null &&
-      baseUser.age === user.age;
+      baseUser.age != null && user.age != null && baseUser.age === user.age;
 
     /* ===== 2. POSITION — যেকোনো একটা মিললেই match ===== */
     const basePos: string[] = baseUser.position ?? [];
@@ -379,7 +436,9 @@ const similerPlayersAndGK = async (userId: string) => {
       baseUser.nationality.toLowerCase() === user.nationality.toLowerCase();
 
     /* ===== TOTAL ===== */
-    const matchCount = [ageMatch, positionMatch, nationalityMatch].filter(Boolean).length;
+    const matchCount = [ageMatch, positionMatch, nationalityMatch].filter(
+      Boolean,
+    ).length;
 
     if (matchCount === 0) continue;
 
@@ -390,7 +449,9 @@ const similerPlayersAndGK = async (userId: string) => {
       : await Attackingstat.findOne(match);
 
     const national = await National.findOne(match);
-    const transfer = await TransferHistory.findOne(match).sort({ createdAt: -1 });
+    const transfer = await TransferHistory.findOne(match).sort({
+      createdAt: -1,
+    });
 
     result.push({
       _id: user._id,
@@ -403,14 +464,16 @@ const similerPlayersAndGK = async (userId: string) => {
       role: user.role,
       similarity,
 
-      ...(user.role === 'player' && stats && {
-        goals: (stats as any).goals,
-        assists: (stats as any).assists,
-      }),
-      ...(user.role === 'gk' && stats && {
-        saves: (stats as any).saves,
-        goalsConceded: (stats as any).goalsConceded,
-      }),
+      ...(user.role === 'player' &&
+        stats && {
+          goals: (stats as any).goals,
+          assists: (stats as any).assists,
+        }),
+      ...(user.role === 'gk' &&
+        stats && {
+          saves: (stats as any).saves,
+          goalsConceded: (stats as any).goalsConceded,
+        }),
 
       nationalTeam: national
         ? {
@@ -448,4 +511,5 @@ export const userService = {
   getSingleUserDetails,
   followUser,
   unfollowUser,
+  getAllGuest,
 };
