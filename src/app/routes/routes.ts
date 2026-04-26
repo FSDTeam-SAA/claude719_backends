@@ -18,6 +18,7 @@ import { teamRouter } from '../modules/team/team.routes';
 import { dashboardRouter } from '../modules/dashboard/dashboard.routes';
 import { gkDistributionstatsRouter } from '../modules/gkdistributionstats/gkdistributionstats.routes';
 import { marketvalueRouter } from '../modules/marketvalue/marketvalue.routes';
+import { coponRoutes } from '../modules/copon/copon.routes';
 
 const router = Router();
 
@@ -97,6 +98,10 @@ const moduleRoutes = [
   {
     path: '/marketvalue',
     route: marketvalueRouter,
+  },
+  {
+    path: '/copon',
+    route: coponRoutes,
   },
 ];
 
