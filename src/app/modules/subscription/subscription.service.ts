@@ -335,6 +335,15 @@ const payIndividualSubscription = async (
     const coupon = await Coupon.findOne({ code: couponCode });
     if (!coupon) throw new AppError(404, 'Coupon not found');
     if (!coupon.isValid) throw new AppError(400, 'Coupon is invalid or expired');
+    if (
+      coupon.appliesTo !== 'all' &&
+      coupon.appliesTo !== subscription.paymentType
+    ) {
+      throw new AppError(
+        400,
+        `This coupon is not applicable for ${subscription.paymentType} payment type`,
+      );
+    }
     
     const discountedPrice = coupon.applyDiscount(finalPrice);
     if (discountedPrice === null) throw new AppError(400, 'Failed to apply coupon');
@@ -568,6 +577,15 @@ const payTeamSubscription = async (
     const coupon = await Coupon.findOne({ code: couponCode });
     if (!coupon) throw new AppError(404, 'Coupon not found');
     if (!coupon.isValid) throw new AppError(400, 'Coupon is invalid or expired');
+    if (
+      coupon.appliesTo !== 'all' &&
+      coupon.appliesTo !== subscription.paymentType
+    ) {
+      throw new AppError(
+        400,
+        `This coupon is not applicable for ${subscription.paymentType} payment type`,
+      );
+    }
     
     const discountedPrice = coupon.applyDiscount(finalPrice);
     if (discountedPrice === null) throw new AppError(400, 'Failed to apply coupon');
@@ -858,6 +876,15 @@ const payEvaluationSubscription = async (
     const coupon = await Coupon.findOne({ code: couponCode });
     if (!coupon) throw new AppError(404, 'Coupon not found');
     if (!coupon.isValid) throw new AppError(400, 'Coupon is invalid or expired');
+    if (
+      coupon.appliesTo !== 'all' &&
+      coupon.appliesTo !== subscription.paymentType
+    ) {
+      throw new AppError(
+        400,
+        `This coupon is not applicable for ${subscription.paymentType} payment type`,
+      );
+    }
     
     const discountedPrice = coupon.applyDiscount(finalPrice);
     if (discountedPrice === null) throw new AppError(400, 'Failed to apply coupon');
@@ -1092,6 +1119,15 @@ const payDevelopmentSubscription = async (
     const coupon = await Coupon.findOne({ code: couponCode });
     if (!coupon) throw new AppError(404, 'Coupon not found');
     if (!coupon.isValid) throw new AppError(400, 'Coupon is invalid or expired');
+    if (
+      coupon.appliesTo !== 'all' &&
+      coupon.appliesTo !== subscription.paymentType
+    ) {
+      throw new AppError(
+        400,
+        `This coupon is not applicable for ${subscription.paymentType} payment type`,
+      );
+    }
     
     const discountedPrice = coupon.applyDiscount(finalPrice);
     if (discountedPrice === null) throw new AppError(400, 'Failed to apply coupon');
@@ -1324,6 +1360,15 @@ const payCombine2026Subscription = async (
     const coupon = await Coupon.findOne({ code: couponCode });
     if (!coupon) throw new AppError(404, 'Coupon not found');
     if (!coupon.isValid) throw new AppError(400, 'Coupon is invalid or expired');
+    if (
+      coupon.appliesTo !== 'all' &&
+      coupon.appliesTo !== subscription.paymentType
+    ) {
+      throw new AppError(
+        400,
+        `This coupon is not applicable for ${subscription.paymentType} payment type`,
+      );
+    }
     
     const discountedPrice = coupon.applyDiscount(finalPrice);
     if (discountedPrice === null) throw new AppError(400, 'Failed to apply coupon');
