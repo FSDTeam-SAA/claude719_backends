@@ -87,9 +87,11 @@ const activeSubscription = catchAsync(async (req, res) => {
 
 const payIndividualSubscription = catchAsync(async (req, res) => {
   const { id } = req.params;
+  const { couponCode } = req.body;
   const result = await SubscriptionService.payIndividualSubscription(
     req.user?.id,
     id!,
+    couponCode,
   );
 
   sendResponse(res, {
@@ -102,7 +104,8 @@ const payIndividualSubscription = catchAsync(async (req, res) => {
 
 const payTeamSubscription = catchAsync(async (req, res) => {
   const { teamId, id } = req.params;
-  const result = await SubscriptionService.payTeamSubscription(teamId!, id!);
+  const { couponCode } = req.body;
+  const result = await SubscriptionService.payTeamSubscription(teamId!, id!, couponCode);
 
   sendResponse(res, {
     statusCode: 200,
@@ -114,10 +117,12 @@ const payTeamSubscription = catchAsync(async (req, res) => {
 
 const payEvaluationSubscription = catchAsync(async (req, res) => {
   const { id } = req.params;
+  const { couponCode } = req.body;
 
   const result = await SubscriptionService.payEvaluationSubscription(
     req.user?.id,
     id!,
+    couponCode,
   );
 
   sendResponse(res, {
@@ -130,10 +135,12 @@ const payEvaluationSubscription = catchAsync(async (req, res) => {
 
 const payDevelopmentSubscription = catchAsync(async (req, res) => {
   const { id } = req.params;
+  const { couponCode } = req.body;
 
   const result = await SubscriptionService.payDevelopmentSubscription(
     req.user?.id,
     id!,
+    couponCode,
   );
 
   sendResponse(res, {
@@ -146,10 +153,12 @@ const payDevelopmentSubscription = catchAsync(async (req, res) => {
 
 const payCombine2026Subscription = catchAsync(async (req, res) => {
   const { id } = req.params;
+  const { couponCode } = req.body;
 
   const result = await SubscriptionService.payCombine2026Subscription(
     req.user?.id,
     id!,
+    couponCode,
   );
 
   sendResponse(res, {

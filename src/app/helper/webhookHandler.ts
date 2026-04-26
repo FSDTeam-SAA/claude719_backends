@@ -7,6 +7,8 @@ import User from '../modules/user/user.model';
 import Team from '../modules/team/team.model';
 import Subscription from '../modules/subscription/subscription.model';
 import { SubscriptionService } from '../modules/subscription/subscription.service';
+import CouponUsage from '../modules/copon/coponuser.model';
+import Coupon from '../modules/copon/copon.model';
 
 const PAYPAL_API_BASE =
   config.env === 'production'
@@ -119,6 +121,24 @@ const handlePaymentCaptured = async (resource: any) => {
     },
     { new: true },
   );
+
+  // --- Coupon Completion Logic ---
+  const couponUsage = await CouponUsage.findOneAndUpdate(
+    { paypalOrderId: orderId },
+    {
+      paymentStatus: 'completed',
+      paypalTransactionId: resource.id,
+    },
+    { new: true }
+  );
+
+  if (couponUsage) {
+    await Coupon.findByIdAndUpdate(couponUsage.coupon, {
+      $inc: { usedCount: 1 }
+    });
+    console.log('✅ Coupon usage marked as completed and usedCount incremented');
+  }
+  // -------------------------------
 
   if (!payment) {
     console.error('❌ Payment record not found for order:', orderId);

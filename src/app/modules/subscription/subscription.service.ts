@@ -106,6 +106,8 @@ import Subscription from './subscription.model';
 import User from '../user/user.model';
 import Payment from '../payment/payment.model';
 import Team from '../team/team.model';
+import Coupon from '../copon/copon.model';
+import CouponUsage from '../copon/coponuser.model';
 
 const PAYPAL_API_BASE =
   config.env === 'production'
@@ -277,6 +279,7 @@ const activeSubscription = async (id: string) => {
 const payIndividualSubscription = async (
   userId: string,
   subscriptionId: string,
+  couponCode?: string,
 ) => {
   console.log('💳 Processing individual payment...');
   console.log('   User ID:', userId);
@@ -322,6 +325,88 @@ const payIndividualSubscription = async (
   }
 
   // Get PayPal access token
+  
+  // --- Coupon Logic ---
+  let finalPrice = subscription.price!;
+  let appliedCoupon = null;
+  let savedAmount = 0;
+
+  if (couponCode) {
+    const coupon = await Coupon.findOne({ code: couponCode });
+    if (!coupon) throw new AppError(404, 'Coupon not found');
+    if (!coupon.isValid) throw new AppError(400, 'Coupon is invalid or expired');
+    
+    const discountedPrice = coupon.applyDiscount(finalPrice);
+    if (discountedPrice === null) throw new AppError(400, 'Failed to apply coupon');
+    
+    savedAmount = finalPrice - discountedPrice;
+    finalPrice = discountedPrice;
+    appliedCoupon = coupon;
+  }
+
+  // Bypass PayPal if 100% discount
+  if (finalPrice <= 0) {
+    console.log('🎉 100% discount applied. Bypassing PayPal...');
+    
+    const payment = await Payment.create({
+      team: undefined,
+      user: user._id,
+      subscription: subscription._id,
+      paypalOrderId: 'FREE_' + Date.now(),
+      paypalCaptureId: 'FREE_' + Date.now(),
+      amount: 0,
+      currency: 'usd',
+      paymentType: subscription.paymentType,
+      status: 'completed',
+    });
+
+    if (appliedCoupon) {
+      await CouponUsage.create({
+        coupon: appliedCoupon._id,
+        couponCode: appliedCoupon.code,
+        user: user._id,
+        eventName: subscription.title,
+        originalPrice: subscription.price,
+        discountedPrice: 0,
+        savedAmount: savedAmount,
+        paymentStatus: 'completed',
+        paypalOrderId: payment.paypalOrderId,
+        paypalTransactionId: payment.paypalCaptureId,
+      });
+      
+      // Update coupon used count
+      appliedCoupon.usedCount += 1;
+      await appliedCoupon.save();
+    }
+
+    // Activate subscription directly
+    
+    let expiry = new Date();
+    if (subscription.interval === 'monthly') expiry.setMonth(expiry.getMonth() + 1);
+    if (subscription.interval === 'yearly') expiry.setFullYear(expiry.getFullYear() + 1);
+    await User.findByIdAndUpdate(user._id, {
+      isSubscription: true,
+      subscription: subscription._id,
+      subscriptionExpiry: expiry,
+    });
+
+
+    return {
+      success: true,
+      orderId: payment.paypalOrderId,
+      paymentId: payment._id.toString(),
+      approvalUrl: `${config.frontendUrl}/success?type=${subscription.paymentType.toLowerCase()}&bypass=true`, // Bypass URL
+      amount: 0,
+      currency: 'USD',
+      subscriptionTitle: subscription.title,
+      message: 'Subscription activated directly via 100% discount coupon',
+    };
+  }
+  // --------------------
+  
+  
+
+  
   const accessToken = await getPayPalAccessToken();
 
   // Create PayPal order
@@ -331,7 +416,7 @@ const payIndividualSubscription = async (
       {
         amount: {
           currency_code: 'USD',
-          value: subscription.price!.toFixed(2),
+          value: finalPrice.toFixed(2),
         },
         description: `${subscription.title} - ${subscription.interval} subscription`,
         custom_id: `user_${userId}_sub_${subscriptionId}`,
@@ -372,13 +457,27 @@ const payIndividualSubscription = async (
       user: user._id,
       subscription: subscription._id,
       paypalOrderId: order.id,
-      amount: subscription.price,
+      amount: finalPrice,
       currency: 'usd',
       paymentType: subscription.paymentType,
       status: 'pending',
     });
 
-    console.log('💾 Payment record created:', payment._id);
+    console.log('💾 Payment record created:', payment._id)
+    if (appliedCoupon) {
+      await CouponUsage.create({
+        coupon: appliedCoupon._id,
+        couponCode: appliedCoupon.code,
+        user: user._id,
+        eventName: subscription.title,
+        originalPrice: subscription.price,
+        discountedPrice: finalPrice,
+        savedAmount: savedAmount,
+        paymentStatus: 'pending',
+        paypalOrderId: order.id,
+      });
+    }
+    ;
 
     // Find approval URL
     const approvalUrl = order.links.find(
@@ -416,7 +515,11 @@ const payIndividualSubscription = async (
 };
 
 // Pay Team Subscription
-const payTeamSubscription = async (teamId: string, subscriptionId: string) => {
+const payTeamSubscription = async (
+  teamId: string,
+  subscriptionId: string,
+  couponCode?: string,
+) => {
   console.log('💳 Processing team payment...');
   console.log('   Team ID:', teamId);
   console.log('   Subscription ID:', subscriptionId);
@@ -455,6 +558,87 @@ const payTeamSubscription = async (teamId: string, subscriptionId: string) => {
   }
 
   // Get PayPal access token
+  
+  // --- Coupon Logic ---
+  let finalPrice = subscription.price!;
+  let appliedCoupon = null;
+  let savedAmount = 0;
+
+  if (couponCode) {
+    const coupon = await Coupon.findOne({ code: couponCode });
+    if (!coupon) throw new AppError(404, 'Coupon not found');
+    if (!coupon.isValid) throw new AppError(400, 'Coupon is invalid or expired');
+    
+    const discountedPrice = coupon.applyDiscount(finalPrice);
+    if (discountedPrice === null) throw new AppError(400, 'Failed to apply coupon');
+    
+    savedAmount = finalPrice - discountedPrice;
+    finalPrice = discountedPrice;
+    appliedCoupon = coupon;
+  }
+
+  // Bypass PayPal if 100% discount
+  if (finalPrice <= 0) {
+    console.log('🎉 100% discount applied. Bypassing PayPal...');
+    
+    const payment = await Payment.create({
+      team: team._id,
+      user: team._id,
+      subscription: subscription._id,
+      paypalOrderId: 'FREE_' + Date.now(),
+      paypalCaptureId: 'FREE_' + Date.now(),
+      amount: 0,
+      currency: 'usd',
+      paymentType: subscription.paymentType,
+      status: 'completed',
+    });
+
+    if (appliedCoupon) {
+      const coach = await User.findOne({ team: teamId, role: 'coach' });
+      const teamUser = coach || (await User.findOne({ team: teamId }));
+      
+      await CouponUsage.create({
+        coupon: appliedCoupon._id,
+        couponCode: appliedCoupon.code,
+        user: teamUser ? teamUser._id : null,
+        eventName: subscription.title,
+        originalPrice: subscription.price,
+        discountedPrice: 0,
+        savedAmount: savedAmount,
+        paymentStatus: 'completed',
+        paypalOrderId: payment.paypalOrderId,
+        paypalTransactionId: payment.paypalCaptureId,
+      });
+      
+      // Update coupon used count
+      appliedCoupon.usedCount += 1;
+      await appliedCoupon.save();
+    }
+
+    // Activate subscription directly
+    
+    let expiry = new Date();
+    if (subscription.interval === 'monthly') expiry.setMonth(expiry.getMonth() + 1);
+    if (subscription.interval === 'yearly') expiry.setFullYear(expiry.getFullYear() + 1);
+    await Team.findByIdAndUpdate(team._id, {
+      subscription: subscription._id,
+      subscriptionExpiry: expiry,
+    });
+
+
+    return {
+      success: true,
+      orderId: payment.paypalOrderId,
+      paymentId: payment._id.toString(),
+      approvalUrl: `${config.frontendUrl}/success?type=${subscription.paymentType.toLowerCase()}&bypass=true`, // Bypass URL
+      amount: 0,
+      currency: 'USD',
+      subscriptionTitle: subscription.title,
+      message: 'Subscription activated directly via 100% discount coupon',
+    };
+  }
+  // --------------------
+  
   const accessToken = await getPayPalAccessToken();
 
   // Create PayPal order
@@ -464,7 +648,7 @@ const payTeamSubscription = async (teamId: string, subscriptionId: string) => {
       {
         amount: {
           currency_code: 'USD',
-          value: subscription.price!.toFixed(2),
+          value: finalPrice.toFixed(2),
         },
         description: `${subscription.title} - ${team.teamName} (${team.players.length} players)`,
         custom_id: `team_${teamId}_sub_${subscriptionId}`,
@@ -510,13 +694,27 @@ const payTeamSubscription = async (teamId: string, subscriptionId: string) => {
       user: payingUser ? payingUser._id : undefined,
       subscription: subscription._id,
       paypalOrderId: order.id,
-      amount: subscription.price,
+      amount: finalPrice,
       currency: 'usd',
       paymentType: subscription.paymentType,
       status: 'pending',
     });
 
-    console.log('💾 Payment record created:', payment._id);
+    console.log('💾 Payment record created:', payment._id)
+    if (appliedCoupon) {
+      await CouponUsage.create({
+        coupon: appliedCoupon._id,
+        couponCode: appliedCoupon.code,
+        user: payingUser ? payingUser._id : undefined,
+        eventName: subscription.title,
+        originalPrice: subscription.price,
+        discountedPrice: finalPrice,
+        savedAmount: savedAmount,
+        paymentStatus: 'pending',
+        paypalOrderId: order.id,
+      });
+    }
+    ;
 
     // Find approval URL
     const approvalUrl = order.links.find(
@@ -603,6 +801,7 @@ const capturePayment = async (orderId: string) => {
 const payEvaluationSubscription = async (
   userId: string,
   subscriptionId: string,
+  couponCode?: string,
 ) => {
   console.log('💳 Processing evaluation payment...');
   console.log('   User ID:', userId);
@@ -649,6 +848,85 @@ const payEvaluationSubscription = async (
   // =============================
   // 4️⃣ Get PayPal Access Token
   // =============================
+  
+  // --- Coupon Logic ---
+  let finalPrice = subscription.price!;
+  let appliedCoupon = null;
+  let savedAmount = 0;
+
+  if (couponCode) {
+    const coupon = await Coupon.findOne({ code: couponCode });
+    if (!coupon) throw new AppError(404, 'Coupon not found');
+    if (!coupon.isValid) throw new AppError(400, 'Coupon is invalid or expired');
+    
+    const discountedPrice = coupon.applyDiscount(finalPrice);
+    if (discountedPrice === null) throw new AppError(400, 'Failed to apply coupon');
+    
+    savedAmount = finalPrice - discountedPrice;
+    finalPrice = discountedPrice;
+    appliedCoupon = coupon;
+  }
+
+  // Bypass PayPal if 100% discount
+  if (finalPrice <= 0) {
+    console.log('🎉 100% discount applied. Bypassing PayPal...');
+    
+    const payment = await Payment.create({
+      team: undefined,
+      user: user._id,
+      subscription: subscription._id,
+      paypalOrderId: 'FREE_' + Date.now(),
+      paypalCaptureId: 'FREE_' + Date.now(),
+      amount: 0,
+      currency: 'usd',
+      paymentType: subscription.paymentType,
+      status: 'completed',
+    });
+
+    if (appliedCoupon) {
+      await CouponUsage.create({
+        coupon: appliedCoupon._id,
+        couponCode: appliedCoupon.code,
+        user: user._id,
+        eventName: subscription.title,
+        originalPrice: subscription.price,
+        discountedPrice: 0,
+        savedAmount: savedAmount,
+        paymentStatus: 'completed',
+        paypalOrderId: payment.paypalOrderId,
+        paypalTransactionId: payment.paypalCaptureId,
+      });
+      
+      // Update coupon used count
+      appliedCoupon.usedCount += 1;
+      await appliedCoupon.save();
+    }
+
+    // Activate subscription directly
+    
+    await User.findByIdAndUpdate(user._id, {
+      isSubscription: true,
+      isEvaluation: true,
+      subscription: subscription._id,
+    });
+
+
+    return {
+      success: true,
+      orderId: payment.paypalOrderId,
+      paymentId: payment._id.toString(),
+      approvalUrl: `${config.frontendUrl}/success?type=${subscription.paymentType.toLowerCase()}&bypass=true`, // Bypass URL
+      amount: 0,
+      currency: 'USD',
+      subscriptionTitle: subscription.title,
+      message: 'Subscription activated directly via 100% discount coupon',
+    };
+  }
+  // --------------------
+  
+  
+
+  
   const accessToken = await getPayPalAccessToken();
 
   // =============================
@@ -660,7 +938,7 @@ const payEvaluationSubscription = async (
       {
         amount: {
           currency_code: subscription.currency?.toUpperCase() || 'USD',
-          value: subscription.price.toFixed(2),
+          value: finalPrice.toFixed(2),
         },
         description: `${subscription.title} - Evaluation Subscription`,
         custom_id: `evaluation_user_${userId}_sub_${subscriptionId}`,
@@ -703,13 +981,27 @@ const payEvaluationSubscription = async (
       user: user._id,
       subscription: subscription._id,
       paypalOrderId: order.id,
-      amount: subscription.price,
+      amount: finalPrice,
       currency: subscription.currency || 'usd',
       paymentType: subscription.paymentType,
       status: 'pending',
     });
 
-    console.log('💾 Payment record created:', payment._id);
+    console.log('💾 Payment record created:', payment._id)
+    if (appliedCoupon) {
+      await CouponUsage.create({
+        coupon: appliedCoupon._id,
+        couponCode: appliedCoupon.code,
+        user: user._id,
+        eventName: subscription.title,
+        originalPrice: subscription.price,
+        discountedPrice: finalPrice,
+        savedAmount: savedAmount,
+        paymentStatus: 'pending',
+        paypalOrderId: order.id,
+      });
+    }
+    ;
 
     // =============================
     // 7️⃣ Extract Approval URL
@@ -751,6 +1043,7 @@ const payEvaluationSubscription = async (
 const payDevelopmentSubscription = async (
   userId: string,
   subscriptionId: string,
+  couponCode?: string,
 ) => {
   console.log('💳 Processing development payment...');
   console.log('   User ID:', userId);
@@ -789,6 +1082,89 @@ const payDevelopmentSubscription = async (
   }
 
   // 4. Get PayPal Access Token
+  
+  // --- Coupon Logic ---
+  let finalPrice = subscription.price!;
+  let appliedCoupon = null;
+  let savedAmount = 0;
+
+  if (couponCode) {
+    const coupon = await Coupon.findOne({ code: couponCode });
+    if (!coupon) throw new AppError(404, 'Coupon not found');
+    if (!coupon.isValid) throw new AppError(400, 'Coupon is invalid or expired');
+    
+    const discountedPrice = coupon.applyDiscount(finalPrice);
+    if (discountedPrice === null) throw new AppError(400, 'Failed to apply coupon');
+    
+    savedAmount = finalPrice - discountedPrice;
+    finalPrice = discountedPrice;
+    appliedCoupon = coupon;
+  }
+
+  // Bypass PayPal if 100% discount
+  if (finalPrice <= 0) {
+    console.log('🎉 100% discount applied. Bypassing PayPal...');
+    
+    const payment = await Payment.create({
+      team: undefined,
+      user: user._id,
+      subscription: subscription._id,
+      paypalOrderId: 'FREE_' + Date.now(),
+      paypalCaptureId: 'FREE_' + Date.now(),
+      amount: 0,
+      currency: 'usd',
+      paymentType: subscription.paymentType,
+      status: 'completed',
+    });
+
+    if (appliedCoupon) {
+      await CouponUsage.create({
+        coupon: appliedCoupon._id,
+        couponCode: appliedCoupon.code,
+        user: user._id,
+        eventName: subscription.title,
+        originalPrice: subscription.price,
+        discountedPrice: 0,
+        savedAmount: savedAmount,
+        paymentStatus: 'completed',
+        paypalOrderId: payment.paypalOrderId,
+        paypalTransactionId: payment.paypalCaptureId,
+      });
+      
+      // Update coupon used count
+      appliedCoupon.usedCount += 1;
+      await appliedCoupon.save();
+    }
+
+    // Activate subscription directly
+    
+    let expiry = new Date();
+    if (subscription.interval === 'monthly') expiry.setMonth(expiry.getMonth() + 1);
+    if (subscription.interval === 'yearly') expiry.setFullYear(expiry.getFullYear() + 1);
+    await User.findByIdAndUpdate(user._id, {
+      isSubscription: true,
+      isDevelopment: true,
+      subscription: subscription._id,
+      subscriptionExpiry: expiry,
+    });
+
+
+    return {
+      success: true,
+      orderId: payment.paypalOrderId,
+      paymentId: payment._id.toString(),
+      approvalUrl: `${config.frontendUrl}/success?type=${subscription.paymentType.toLowerCase()}&bypass=true`, // Bypass URL
+      amount: 0,
+      currency: 'USD',
+      subscriptionTitle: subscription.title,
+      message: 'Subscription activated directly via 100% discount coupon',
+    };
+  }
+  // --------------------
+  
+  
+
+  
   const accessToken = await getPayPalAccessToken();
 
   // 5. Create PayPal Order
@@ -798,7 +1174,7 @@ const payDevelopmentSubscription = async (
       {
         amount: {
           currency_code: subscription.currency?.toUpperCase() || 'USD',
-          value: subscription.price.toFixed(2),
+          value: finalPrice.toFixed(2),
         },
         description: `${subscription.title} - Development Subscription`,
         custom_id: `development_user_${userId}_sub_${subscriptionId}`,
@@ -839,13 +1215,27 @@ const payDevelopmentSubscription = async (
       user: user._id,
       subscription: subscription._id,
       paypalOrderId: order.id,
-      amount: subscription.price,
+      amount: finalPrice,
       currency: subscription.currency || 'usd',
       paymentType: subscription.paymentType,
       status: 'pending',
     });
 
-    console.log('💾 Payment record created:', payment._id);
+    console.log('💾 Payment record created:', payment._id)
+    if (appliedCoupon) {
+      await CouponUsage.create({
+        coupon: appliedCoupon._id,
+        couponCode: appliedCoupon.code,
+        user: user._id,
+        eventName: subscription.title,
+        originalPrice: subscription.price,
+        discountedPrice: finalPrice,
+        savedAmount: savedAmount,
+        paymentStatus: 'pending',
+        paypalOrderId: order.id,
+      });
+    }
+    ;
 
     // 7. Extract Approval URL
     const approvalUrl = order.links?.find(
@@ -885,6 +1275,7 @@ const payDevelopmentSubscription = async (
 const payCombine2026Subscription = async (
   userId: string,
   subscriptionId: string,
+  couponCode?: string,
 ) => {
   console.log('💳 Processing Combine 2026 payment...');
   console.log('   User ID:', userId);
@@ -923,6 +1314,89 @@ const payCombine2026Subscription = async (
   }
 
   // 4. Get PayPal Access Token
+  
+  // --- Coupon Logic ---
+  let finalPrice = subscription.price!;
+  let appliedCoupon = null;
+  let savedAmount = 0;
+
+  if (couponCode) {
+    const coupon = await Coupon.findOne({ code: couponCode });
+    if (!coupon) throw new AppError(404, 'Coupon not found');
+    if (!coupon.isValid) throw new AppError(400, 'Coupon is invalid or expired');
+    
+    const discountedPrice = coupon.applyDiscount(finalPrice);
+    if (discountedPrice === null) throw new AppError(400, 'Failed to apply coupon');
+    
+    savedAmount = finalPrice - discountedPrice;
+    finalPrice = discountedPrice;
+    appliedCoupon = coupon;
+  }
+
+  // Bypass PayPal if 100% discount
+  if (finalPrice <= 0) {
+    console.log('🎉 100% discount applied. Bypassing PayPal...');
+    
+    const payment = await Payment.create({
+      team: undefined,
+      user: user._id,
+      subscription: subscription._id,
+      paypalOrderId: 'FREE_' + Date.now(),
+      paypalCaptureId: 'FREE_' + Date.now(),
+      amount: 0,
+      currency: 'usd',
+      paymentType: subscription.paymentType,
+      status: 'completed',
+    });
+
+    if (appliedCoupon) {
+      await CouponUsage.create({
+        coupon: appliedCoupon._id,
+        couponCode: appliedCoupon.code,
+        user: user._id,
+        eventName: subscription.title,
+        originalPrice: subscription.price,
+        discountedPrice: 0,
+        savedAmount: savedAmount,
+        paymentStatus: 'completed',
+        paypalOrderId: payment.paypalOrderId,
+        paypalTransactionId: payment.paypalCaptureId,
+      });
+      
+      // Update coupon used count
+      appliedCoupon.usedCount += 1;
+      await appliedCoupon.save();
+    }
+
+    // Activate subscription directly
+    
+    let expiry = new Date();
+    if (subscription.interval === 'monthly') expiry.setMonth(expiry.getMonth() + 1);
+    if (subscription.interval === 'yearly') expiry.setFullYear(expiry.getFullYear() + 1);
+    await User.findByIdAndUpdate(user._id, {
+      isSubscription: true,
+      isCombine2026: true,
+      subscription: subscription._id,
+      subscriptionExpiry: expiry,
+    });
+
+
+    return {
+      success: true,
+      orderId: payment.paypalOrderId,
+      paymentId: payment._id.toString(),
+      approvalUrl: `${config.frontendUrl}/success?type=${subscription.paymentType.toLowerCase()}&bypass=true`, // Bypass URL
+      amount: 0,
+      currency: 'USD',
+      subscriptionTitle: subscription.title,
+      message: 'Subscription activated directly via 100% discount coupon',
+    };
+  }
+  // --------------------
+  
+  
+
+  
   const accessToken = await getPayPalAccessToken();
 
   // 5. Create PayPal Order
@@ -932,7 +1406,7 @@ const payCombine2026Subscription = async (
       {
         amount: {
           currency_code: subscription.currency?.toUpperCase() || 'USD',
-          value: subscription.price.toFixed(2),
+          value: finalPrice.toFixed(2),
         },
         description: `${subscription.title} - Combine 2026 Subscription`,
         custom_id: `combine2026_user_${userId}_sub_${subscriptionId}`,
@@ -973,13 +1447,27 @@ const payCombine2026Subscription = async (
       user: user._id,
       subscription: subscription._id,
       paypalOrderId: order.id,
-      amount: subscription.price,
+      amount: finalPrice,
       currency: subscription.currency || 'usd',
       paymentType: subscription.paymentType,
       status: 'pending',
     });
 
-    console.log('💾 Payment record created:', payment._id);
+    console.log('💾 Payment record created:', payment._id)
+    if (appliedCoupon) {
+      await CouponUsage.create({
+        coupon: appliedCoupon._id,
+        couponCode: appliedCoupon.code,
+        user: user._id,
+        eventName: subscription.title,
+        originalPrice: subscription.price,
+        discountedPrice: finalPrice,
+        savedAmount: savedAmount,
+        paymentStatus: 'pending',
+        paypalOrderId: order.id,
+      });
+    }
+    ;
 
     // 7. Extract Approval URL
     const approvalUrl = order.links?.find(
