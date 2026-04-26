@@ -66,8 +66,12 @@ const deleteCopon = async (id: string) => {
   return result;
 };
 
-const applyCopon = async (payload: { code: string; originalPrice: number }) => {
-  const { code, originalPrice } = payload;
+const applyCopon = async (payload: {
+  code: string;
+  originalPrice: number;
+  paymentType?: string;
+}) => {
+  const { code, originalPrice, paymentType } = payload;
   const coupon = await Coupon.findOne({ code });
   
   if (!coupon) {
@@ -76,6 +80,17 @@ const applyCopon = async (payload: { code: string; originalPrice: number }) => {
 
   if (!coupon.isValid) {
     throw new AppError(400, 'Coupon is invalid or expired');
+  }
+
+  if (
+    paymentType &&
+    coupon.appliesTo !== 'all' &&
+    coupon.appliesTo !== paymentType
+  ) {
+    throw new AppError(
+      400,
+      `This coupon is not applicable for ${paymentType} payment type`,
+    );
   }
 
   const discountedPrice = coupon.applyDiscount(originalPrice);
