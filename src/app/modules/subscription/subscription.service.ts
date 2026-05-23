@@ -325,7 +325,7 @@ const payIndividualSubscription = async (
   }
 
   // Get PayPal access token
-  
+
   // --- Coupon Logic ---
   let finalPrice = subscription.price!;
   let appliedCoupon = null;
@@ -334,7 +334,8 @@ const payIndividualSubscription = async (
   if (couponCode) {
     const coupon = await Coupon.findOne({ code: couponCode });
     if (!coupon) throw new AppError(404, 'Coupon not found');
-    if (!coupon.isValid) throw new AppError(400, 'Coupon is invalid or expired');
+    if (!coupon.isValid)
+      throw new AppError(400, 'Coupon is invalid or expired');
     if (
       coupon.appliesTo !== 'all' &&
       coupon.appliesTo !== subscription.paymentType
@@ -344,10 +345,11 @@ const payIndividualSubscription = async (
         `This coupon is not applicable for ${subscription.paymentType} payment type`,
       );
     }
-    
+
     const discountedPrice = coupon.applyDiscount(finalPrice);
-    if (discountedPrice === null) throw new AppError(400, 'Failed to apply coupon');
-    
+    if (discountedPrice === null)
+      throw new AppError(400, 'Failed to apply coupon');
+
     savedAmount = finalPrice - discountedPrice;
     finalPrice = discountedPrice;
     appliedCoupon = coupon;
@@ -356,7 +358,7 @@ const payIndividualSubscription = async (
   // Bypass PayPal if 100% discount
   if (finalPrice <= 0) {
     console.log('🎉 100% discount applied. Bypassing PayPal...');
-    
+
     const payment = await Payment.create({
       team: undefined,
       user: user._id,
@@ -382,23 +384,24 @@ const payIndividualSubscription = async (
         paypalOrderId: payment.paypalOrderId,
         paypalTransactionId: payment.paypalCaptureId,
       });
-      
+
       // Update coupon used count
       appliedCoupon.usedCount += 1;
       await appliedCoupon.save();
     }
 
     // Activate subscription directly
-    
+
     let expiry = new Date();
-    if (subscription.interval === 'monthly') expiry.setMonth(expiry.getMonth() + 1);
-    if (subscription.interval === 'yearly') expiry.setFullYear(expiry.getFullYear() + 1);
+    if (subscription.interval === 'monthly')
+      expiry.setMonth(expiry.getMonth() + 1);
+    if (subscription.interval === 'yearly')
+      expiry.setFullYear(expiry.getFullYear() + 1);
     await User.findByIdAndUpdate(user._id, {
       isSubscription: true,
       subscription: subscription._id,
       subscriptionExpiry: expiry,
     });
-
 
     return {
       success: true,
@@ -412,10 +415,7 @@ const payIndividualSubscription = async (
     };
   }
   // --------------------
-  
-  
 
-  
   const accessToken = await getPayPalAccessToken();
 
   // Create PayPal order
@@ -472,7 +472,7 @@ const payIndividualSubscription = async (
       status: 'pending',
     });
 
-    console.log('💾 Payment record created:', payment._id)
+    console.log('💾 Payment record created:', payment._id);
     if (appliedCoupon) {
       await CouponUsage.create({
         coupon: appliedCoupon._id,
@@ -486,8 +486,6 @@ const payIndividualSubscription = async (
         paypalOrderId: order.id,
       });
     }
-    ;
-
     // Find approval URL
     const approvalUrl = order.links.find(
       (link: any) => link.rel === 'approve',
@@ -567,16 +565,19 @@ const payTeamSubscription = async (
   }
 
   // Get PayPal access token
-  
+
   // --- Coupon Logic ---
-  let finalPrice = subscription.price!;
+  // let finalPrice = subscription.price!;
+  const playerCount = team.players.length;
+  let finalPrice = subscription.price! * playerCount;
   let appliedCoupon = null;
   let savedAmount = 0;
 
   if (couponCode) {
     const coupon = await Coupon.findOne({ code: couponCode });
     if (!coupon) throw new AppError(404, 'Coupon not found');
-    if (!coupon.isValid) throw new AppError(400, 'Coupon is invalid or expired');
+    if (!coupon.isValid)
+      throw new AppError(400, 'Coupon is invalid or expired');
     if (
       coupon.appliesTo !== 'all' &&
       coupon.appliesTo !== subscription.paymentType
@@ -586,10 +587,11 @@ const payTeamSubscription = async (
         `This coupon is not applicable for ${subscription.paymentType} payment type`,
       );
     }
-    
+
     const discountedPrice = coupon.applyDiscount(finalPrice);
-    if (discountedPrice === null) throw new AppError(400, 'Failed to apply coupon');
-    
+    if (discountedPrice === null)
+      throw new AppError(400, 'Failed to apply coupon');
+
     savedAmount = finalPrice - discountedPrice;
     finalPrice = discountedPrice;
     appliedCoupon = coupon;
@@ -598,7 +600,7 @@ const payTeamSubscription = async (
   // Bypass PayPal if 100% discount
   if (finalPrice <= 0) {
     console.log('🎉 100% discount applied. Bypassing PayPal...');
-    
+
     const payment = await Payment.create({
       team: team._id,
       user: team._id,
@@ -614,7 +616,7 @@ const payTeamSubscription = async (
     if (appliedCoupon) {
       const coach = await User.findOne({ team: teamId, role: 'coach' });
       const teamUser = coach || (await User.findOne({ team: teamId }));
-      
+
       await CouponUsage.create({
         coupon: appliedCoupon._id,
         couponCode: appliedCoupon.code,
@@ -627,22 +629,23 @@ const payTeamSubscription = async (
         paypalOrderId: payment.paypalOrderId,
         paypalTransactionId: payment.paypalCaptureId,
       });
-      
+
       // Update coupon used count
       appliedCoupon.usedCount += 1;
       await appliedCoupon.save();
     }
 
     // Activate subscription directly
-    
+
     let expiry = new Date();
-    if (subscription.interval === 'monthly') expiry.setMonth(expiry.getMonth() + 1);
-    if (subscription.interval === 'yearly') expiry.setFullYear(expiry.getFullYear() + 1);
+    if (subscription.interval === 'monthly')
+      expiry.setMonth(expiry.getMonth() + 1);
+    if (subscription.interval === 'yearly')
+      expiry.setFullYear(expiry.getFullYear() + 1);
     await Team.findByIdAndUpdate(team._id, {
       subscription: subscription._id,
       subscriptionExpiry: expiry,
     });
-
 
     return {
       success: true,
@@ -656,7 +659,7 @@ const payTeamSubscription = async (
     };
   }
   // --------------------
-  
+
   const accessToken = await getPayPalAccessToken();
 
   // Create PayPal order
@@ -718,7 +721,7 @@ const payTeamSubscription = async (
       status: 'pending',
     });
 
-    console.log('💾 Payment record created:', payment._id)
+    console.log('💾 Payment record created:', payment._id);
     if (appliedCoupon) {
       await CouponUsage.create({
         coupon: appliedCoupon._id,
@@ -732,8 +735,6 @@ const payTeamSubscription = async (
         paypalOrderId: order.id,
       });
     }
-    ;
-
     // Find approval URL
     const approvalUrl = order.links.find(
       (link: any) => link.rel === 'approve',
@@ -750,7 +751,8 @@ const payTeamSubscription = async (
       orderId: order.id,
       paymentId: payment._id.toString(),
       approvalUrl,
-      amount: subscription.price,
+      // amount: subscription.price,
+      amount: finalPrice,
       currency: 'USD',
       subscriptionTitle: subscription.title,
       teamName: team.teamName,
@@ -866,7 +868,7 @@ const payEvaluationSubscription = async (
   // =============================
   // 4️⃣ Get PayPal Access Token
   // =============================
-  
+
   // --- Coupon Logic ---
   let finalPrice = subscription.price!;
   let appliedCoupon = null;
@@ -875,7 +877,8 @@ const payEvaluationSubscription = async (
   if (couponCode) {
     const coupon = await Coupon.findOne({ code: couponCode });
     if (!coupon) throw new AppError(404, 'Coupon not found');
-    if (!coupon.isValid) throw new AppError(400, 'Coupon is invalid or expired');
+    if (!coupon.isValid)
+      throw new AppError(400, 'Coupon is invalid or expired');
     if (
       coupon.appliesTo !== 'all' &&
       coupon.appliesTo !== subscription.paymentType
@@ -885,10 +888,11 @@ const payEvaluationSubscription = async (
         `This coupon is not applicable for ${subscription.paymentType} payment type`,
       );
     }
-    
+
     const discountedPrice = coupon.applyDiscount(finalPrice);
-    if (discountedPrice === null) throw new AppError(400, 'Failed to apply coupon');
-    
+    if (discountedPrice === null)
+      throw new AppError(400, 'Failed to apply coupon');
+
     savedAmount = finalPrice - discountedPrice;
     finalPrice = discountedPrice;
     appliedCoupon = coupon;
@@ -897,7 +901,7 @@ const payEvaluationSubscription = async (
   // Bypass PayPal if 100% discount
   if (finalPrice <= 0) {
     console.log('🎉 100% discount applied. Bypassing PayPal...');
-    
+
     const payment = await Payment.create({
       team: undefined,
       user: user._id,
@@ -923,20 +927,19 @@ const payEvaluationSubscription = async (
         paypalOrderId: payment.paypalOrderId,
         paypalTransactionId: payment.paypalCaptureId,
       });
-      
+
       // Update coupon used count
       appliedCoupon.usedCount += 1;
       await appliedCoupon.save();
     }
 
     // Activate subscription directly
-    
+
     await User.findByIdAndUpdate(user._id, {
       isSubscription: true,
       isEvaluation: true,
       subscription: subscription._id,
     });
-
 
     return {
       success: true,
@@ -950,10 +953,7 @@ const payEvaluationSubscription = async (
     };
   }
   // --------------------
-  
-  
 
-  
   const accessToken = await getPayPalAccessToken();
 
   // =============================
@@ -1014,7 +1014,7 @@ const payEvaluationSubscription = async (
       status: 'pending',
     });
 
-    console.log('💾 Payment record created:', payment._id)
+    console.log('💾 Payment record created:', payment._id);
     if (appliedCoupon) {
       await CouponUsage.create({
         coupon: appliedCoupon._id,
@@ -1028,8 +1028,6 @@ const payEvaluationSubscription = async (
         paypalOrderId: order.id,
       });
     }
-    ;
-
     // =============================
     // 7️⃣ Extract Approval URL
     // =============================
@@ -1089,7 +1087,10 @@ const payDevelopmentSubscription = async (
   }
 
   if (subscription.paymentType !== 'Development') {
-    throw new AppError(400, 'This subscription is not a Development subscription.');
+    throw new AppError(
+      400,
+      'This subscription is not a Development subscription.',
+    );
   }
 
   if (subscription.status !== 'active') {
@@ -1109,7 +1110,7 @@ const payDevelopmentSubscription = async (
   }
 
   // 4. Get PayPal Access Token
-  
+
   // --- Coupon Logic ---
   let finalPrice = subscription.price!;
   let appliedCoupon = null;
@@ -1118,7 +1119,8 @@ const payDevelopmentSubscription = async (
   if (couponCode) {
     const coupon = await Coupon.findOne({ code: couponCode });
     if (!coupon) throw new AppError(404, 'Coupon not found');
-    if (!coupon.isValid) throw new AppError(400, 'Coupon is invalid or expired');
+    if (!coupon.isValid)
+      throw new AppError(400, 'Coupon is invalid or expired');
     if (
       coupon.appliesTo !== 'all' &&
       coupon.appliesTo !== subscription.paymentType
@@ -1128,10 +1130,11 @@ const payDevelopmentSubscription = async (
         `This coupon is not applicable for ${subscription.paymentType} payment type`,
       );
     }
-    
+
     const discountedPrice = coupon.applyDiscount(finalPrice);
-    if (discountedPrice === null) throw new AppError(400, 'Failed to apply coupon');
-    
+    if (discountedPrice === null)
+      throw new AppError(400, 'Failed to apply coupon');
+
     savedAmount = finalPrice - discountedPrice;
     finalPrice = discountedPrice;
     appliedCoupon = coupon;
@@ -1140,7 +1143,7 @@ const payDevelopmentSubscription = async (
   // Bypass PayPal if 100% discount
   if (finalPrice <= 0) {
     console.log('🎉 100% discount applied. Bypassing PayPal...');
-    
+
     const payment = await Payment.create({
       team: undefined,
       user: user._id,
@@ -1166,24 +1169,25 @@ const payDevelopmentSubscription = async (
         paypalOrderId: payment.paypalOrderId,
         paypalTransactionId: payment.paypalCaptureId,
       });
-      
+
       // Update coupon used count
       appliedCoupon.usedCount += 1;
       await appliedCoupon.save();
     }
 
     // Activate subscription directly
-    
+
     let expiry = new Date();
-    if (subscription.interval === 'monthly') expiry.setMonth(expiry.getMonth() + 1);
-    if (subscription.interval === 'yearly') expiry.setFullYear(expiry.getFullYear() + 1);
+    if (subscription.interval === 'monthly')
+      expiry.setMonth(expiry.getMonth() + 1);
+    if (subscription.interval === 'yearly')
+      expiry.setFullYear(expiry.getFullYear() + 1);
     await User.findByIdAndUpdate(user._id, {
       isSubscription: true,
       isDevelopment: true,
       subscription: subscription._id,
       subscriptionExpiry: expiry,
     });
-
 
     return {
       success: true,
@@ -1197,10 +1201,7 @@ const payDevelopmentSubscription = async (
     };
   }
   // --------------------
-  
-  
 
-  
   const accessToken = await getPayPalAccessToken();
 
   // 5. Create PayPal Order
@@ -1257,7 +1258,7 @@ const payDevelopmentSubscription = async (
       status: 'pending',
     });
 
-    console.log('💾 Payment record created:', payment._id)
+    console.log('💾 Payment record created:', payment._id);
     if (appliedCoupon) {
       await CouponUsage.create({
         coupon: appliedCoupon._id,
@@ -1271,8 +1272,6 @@ const payDevelopmentSubscription = async (
         paypalOrderId: order.id,
       });
     }
-    ;
-
     // 7. Extract Approval URL
     const approvalUrl = order.links?.find(
       (link: any) => link.rel === 'approve',
@@ -1330,7 +1329,10 @@ const payCombine2026Subscription = async (
   }
 
   if (subscription.paymentType !== 'Combine_2026') {
-    throw new AppError(400, 'This subscription is not a Combine 2026 subscription.');
+    throw new AppError(
+      400,
+      'This subscription is not a Combine 2026 subscription.',
+    );
   }
 
   if (subscription.status !== 'active') {
@@ -1350,7 +1352,7 @@ const payCombine2026Subscription = async (
   }
 
   // 4. Get PayPal Access Token
-  
+
   // --- Coupon Logic ---
   let finalPrice = subscription.price!;
   let appliedCoupon = null;
@@ -1359,7 +1361,8 @@ const payCombine2026Subscription = async (
   if (couponCode) {
     const coupon = await Coupon.findOne({ code: couponCode });
     if (!coupon) throw new AppError(404, 'Coupon not found');
-    if (!coupon.isValid) throw new AppError(400, 'Coupon is invalid or expired');
+    if (!coupon.isValid)
+      throw new AppError(400, 'Coupon is invalid or expired');
     if (
       coupon.appliesTo !== 'all' &&
       coupon.appliesTo !== subscription.paymentType
@@ -1369,10 +1372,11 @@ const payCombine2026Subscription = async (
         `This coupon is not applicable for ${subscription.paymentType} payment type`,
       );
     }
-    
+
     const discountedPrice = coupon.applyDiscount(finalPrice);
-    if (discountedPrice === null) throw new AppError(400, 'Failed to apply coupon');
-    
+    if (discountedPrice === null)
+      throw new AppError(400, 'Failed to apply coupon');
+
     savedAmount = finalPrice - discountedPrice;
     finalPrice = discountedPrice;
     appliedCoupon = coupon;
@@ -1381,7 +1385,7 @@ const payCombine2026Subscription = async (
   // Bypass PayPal if 100% discount
   if (finalPrice <= 0) {
     console.log('🎉 100% discount applied. Bypassing PayPal...');
-    
+
     const payment = await Payment.create({
       team: undefined,
       user: user._id,
@@ -1407,24 +1411,25 @@ const payCombine2026Subscription = async (
         paypalOrderId: payment.paypalOrderId,
         paypalTransactionId: payment.paypalCaptureId,
       });
-      
+
       // Update coupon used count
       appliedCoupon.usedCount += 1;
       await appliedCoupon.save();
     }
 
     // Activate subscription directly
-    
+
     let expiry = new Date();
-    if (subscription.interval === 'monthly') expiry.setMonth(expiry.getMonth() + 1);
-    if (subscription.interval === 'yearly') expiry.setFullYear(expiry.getFullYear() + 1);
+    if (subscription.interval === 'monthly')
+      expiry.setMonth(expiry.getMonth() + 1);
+    if (subscription.interval === 'yearly')
+      expiry.setFullYear(expiry.getFullYear() + 1);
     await User.findByIdAndUpdate(user._id, {
       isSubscription: true,
       isCombine2026: true,
       subscription: subscription._id,
       subscriptionExpiry: expiry,
     });
-
 
     return {
       success: true,
@@ -1438,10 +1443,7 @@ const payCombine2026Subscription = async (
     };
   }
   // --------------------
-  
-  
 
-  
   const accessToken = await getPayPalAccessToken();
 
   // 5. Create PayPal Order
@@ -1498,7 +1500,7 @@ const payCombine2026Subscription = async (
       status: 'pending',
     });
 
-    console.log('💾 Payment record created:', payment._id)
+    console.log('💾 Payment record created:', payment._id);
     if (appliedCoupon) {
       await CouponUsage.create({
         coupon: appliedCoupon._id,
@@ -1512,8 +1514,6 @@ const payCombine2026Subscription = async (
         paypalOrderId: order.id,
       });
     }
-    ;
-
     // 7. Extract Approval URL
     const approvalUrl = order.links?.find(
       (link: any) => link.rel === 'approve',
