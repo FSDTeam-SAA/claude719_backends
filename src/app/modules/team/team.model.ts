@@ -27,6 +27,8 @@ const TeamSchema = new mongoose.Schema<ITeam>(
         name: String,
         email: String,
         role: String,
+        position: String,
+        JerseyNumber: String,
         usedGames: {
           type: Number,
           default: 0,
