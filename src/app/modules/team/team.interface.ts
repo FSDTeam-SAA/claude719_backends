@@ -4,7 +4,9 @@ export interface ITeamPlayer {
   user?: Types.ObjectId;
   name: string;
   email: string;
-  role: string;
+  role?: string;
+  position?: string;
+  JerseyNumber?: string;
   usedGames?: number;
 }
 
