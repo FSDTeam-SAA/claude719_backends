@@ -6,7 +6,7 @@ export interface ITeamPlayer {
   email: string;
   role?: string;
   position?: string;
-  JerseyNumber?: string;
+  jerseyNumber?: string;
   usedGames?: number;
 }
 
