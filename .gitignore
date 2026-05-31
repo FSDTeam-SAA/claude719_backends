@@ -153,3 +153,5 @@ $RECYCLE.BIN/
 .vercel
 .env*.local
 config.bat
+.env
+.env
