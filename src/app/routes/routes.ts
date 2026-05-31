@@ -19,6 +19,7 @@ import { dashboardRouter } from '../modules/dashboard/dashboard.routes';
 import { gkDistributionstatsRouter } from '../modules/gkdistributionstats/gkdistributionstats.routes';
 import { marketvalueRouter } from '../modules/marketvalue/marketvalue.routes';
 import { coponRoutes } from '../modules/copon/copon.routes';
+import { PaymentRoutes } from '../modules/payment/payment.routes';
 
 const router = Router();
 
@@ -102,6 +103,10 @@ const moduleRoutes = [
   {
     path: '/copon',
     route: coponRoutes,
+  },
+  {
+    path: '/payment',
+    route: PaymentRoutes,
   },
 ];
 
