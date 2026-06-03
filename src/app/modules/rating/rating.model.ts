@@ -1,3 +1,43 @@
+// import mongoose from 'mongoose';
+// import { IRating } from './rating.interface';
+
+// const ratingSchema = new mongoose.Schema<IRating>(
+//   {
+//     player: {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: 'User',
+//     },
+//     gk: {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: 'User',
+//     },
+//     rating: {
+//       type: Number,
+//     },
+//     position: [
+//       {
+//         type: String,
+//       },
+//     ],
+//     gamesNumber: {
+//       type: Number,
+//       default: 0,
+//     },
+//     minutes: {
+//       type: Number,
+//     },
+//     date: {
+//       type: Date,
+//       default: Date.now,
+//     },
+//   },
+//   { timestamps: true },
+// );
+// const Rating = mongoose.model<IRating>('Rating', ratingSchema);
+// export default Rating;
+
+
+//============================================== update ==========
 import mongoose from 'mongoose';
 import { IRating } from './rating.interface';
 
@@ -33,5 +73,8 @@ const ratingSchema = new mongoose.Schema<IRating>(
   },
   { timestamps: true },
 );
+ratingSchema.index({ player: 1 });
+ratingSchema.index({ gk: 1 });
+
 const Rating = mongoose.model<IRating>('Rating', ratingSchema);
 export default Rating;

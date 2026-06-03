@@ -1,3 +1,62 @@
+// import mongoose, { Schema } from 'mongoose';
+// import { ITransferhistory } from './transferhistory.interface';
+
+// const TransferHistorySchema = new Schema<ITransferhistory>(
+//   {
+//     player: {
+//       type: Schema.Types.ObjectId,
+//       ref: 'User',
+//     },
+//     gk: {
+//       type: Schema.Types.ObjectId,
+//       ref: 'User',
+//     },
+//     season: {
+//       type: String,
+//       trim: true,
+//     },
+//     date: {
+//       type: Date,
+//       default: Date.now,
+//     },
+
+//     // Left club info
+//     leftClubName: {
+//       type: String,
+//       trim: true,
+//     },
+//     leftClub: {
+//       type: String,
+//     },
+//     leftCountery: {
+//       type: String,
+//     },
+
+//     // Joined club info
+//     joinedclubName: {
+//       type: String,
+//       trim: true,
+//     },
+//     joinedClub: {
+//       type: String,
+//     },
+//     joinedCountery: {
+//       type: String,
+//     },
+//   },
+//   {
+//     timestamps: true,
+//   },
+// );
+
+// const TransferHistory = mongoose.model<ITransferhistory>(
+//   'TransferHistory',
+//   TransferHistorySchema,
+// );
+
+// export default TransferHistory;
+
+//============================================== update ==========
 import mongoose, { Schema } from 'mongoose';
 import { ITransferhistory } from './transferhistory.interface';
 
@@ -48,6 +107,9 @@ const TransferHistorySchema = new Schema<ITransferhistory>(
     timestamps: true,
   },
 );
+
+TransferHistorySchema.index({ player: 1 });
+TransferHistorySchema.index({ gk: 1 });
 
 const TransferHistory = mongoose.model<ITransferhistory>(
   'TransferHistory',
