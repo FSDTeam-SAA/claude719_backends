@@ -244,7 +244,7 @@
 // const User = mongoose.model<IUser>('User', userSchema);
 // export default User;
 
-//======================================= net code =========================================
+//======================================= update code =========================================
 import mongoose, { Schema } from 'mongoose';
 import { IUser } from './user.interface';
 import bcrypt from 'bcryptjs';

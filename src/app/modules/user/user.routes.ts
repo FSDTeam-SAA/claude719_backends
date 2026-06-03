@@ -1,3 +1,88 @@
+// import express from 'express';
+// import { userController } from './user.controller';
+// import auth from '../../middlewares/auth';
+
+// import { userRole } from './user.constant';
+// import { fileUploader } from '../../helper/fileUploder';
+// import videoLimitMiddleware from '../../helper/videoLimitMiddleware';
+
+// const router = express.Router();
+
+// router.post('/create-user', auth(userRole.admin), userController.createUser);
+
+// router.get(
+//   '/profile',
+//   auth(userRole.admin, userRole.player, userRole.gk, userRole.coach, userRole.guest),
+//   userController.profile,
+// );
+// router.put(
+//   '/profile',
+//   auth(userRole.admin, userRole.player, userRole.gk, userRole.coach, userRole.guest),
+//   fileUploader.upload.fields([
+//     { name: 'profileImage', maxCount: 1 },
+//     { name: 'playingVideo', maxCount: 5 },
+//   ]),
+//   videoLimitMiddleware('playingVideo'),
+//   userController.updateMyProfile,
+// );
+
+// router.put(
+//   '/video-add',
+//   auth(userRole.admin, userRole.player, userRole.gk, userRole.coach, userRole.guest),
+//   fileUploader.upload.array('playingVideo', 5),
+//   videoLimitMiddleware('playingVideo'),
+//   userController.videoAdd,
+// );
+// router.delete(
+//   '/video-remove',
+//   auth(userRole.admin, userRole.player, userRole.gk, userRole.coach, userRole.guest),
+//   userController.removedVideo,
+// );
+
+// router.get('/all-user', userController.getAllUser);
+// router.get('/all-guest', userController.getAllGuest);
+// router.get(
+//   '/detail/:id',
+//   // auth(userRole.admin),
+//   userController.getSingleUserDetails,
+// );
+// router.put(
+//   '/follow/:targetUserId',
+//   auth(
+//     userRole.coach,
+//     userRole.gk,
+//     userRole.player,
+//     userRole.admin,
+//     userRole.user,
+//   ),
+//   userController.followUser,
+// );
+// router.delete(
+//   '/unfollow/:targetUserId',
+//   auth(
+//     userRole.coach,
+//     userRole.gk,
+//     userRole.player,
+//     userRole.admin,
+//     userRole.user,
+//   ),
+//   userController.unfollowUser,
+// );
+// router.get('/:id', userController.getUserById);
+// router.put(
+//   '/:id',
+//   auth(userRole.admin),
+//   fileUploader.upload.fields([
+//     { name: 'profileImage', maxCount: 1 },
+//     { name: 'playingVideo', maxCount: 5 },
+//   ]),
+//   userController.updateUserById,
+// );
+// router.delete('/:id', auth(userRole.admin), userController.deleteUserById);
+
+// export const userRoutes = router;
+
+//============================================== update ===============================================================
 import express from 'express';
 import { userController } from './user.controller';
 import auth from '../../middlewares/auth';
@@ -12,12 +97,24 @@ router.post('/create-user', auth(userRole.admin), userController.createUser);
 
 router.get(
   '/profile',
-  auth(userRole.admin, userRole.player, userRole.gk, userRole.coach, userRole.guest),
+  auth(
+    userRole.admin,
+    userRole.player,
+    userRole.gk,
+    userRole.coach,
+    userRole.guest,
+  ),
   userController.profile,
 );
 router.put(
   '/profile',
-  auth(userRole.admin, userRole.player, userRole.gk, userRole.coach, userRole.guest),
+  auth(
+    userRole.admin,
+    userRole.player,
+    userRole.gk,
+    userRole.coach,
+    userRole.guest,
+  ),
   fileUploader.upload.fields([
     { name: 'profileImage', maxCount: 1 },
     { name: 'playingVideo', maxCount: 5 },
@@ -28,14 +125,26 @@ router.put(
 
 router.put(
   '/video-add',
-  auth(userRole.admin, userRole.player, userRole.gk, userRole.coach, userRole.guest),
+  auth(
+    userRole.admin,
+    userRole.player,
+    userRole.gk,
+    userRole.coach,
+    userRole.guest,
+  ),
   fileUploader.upload.array('playingVideo', 5),
   videoLimitMiddleware('playingVideo'),
   userController.videoAdd,
 );
 router.delete(
   '/video-remove',
-  auth(userRole.admin, userRole.player, userRole.gk, userRole.coach, userRole.guest),
+  auth(
+    userRole.admin,
+    userRole.player,
+    userRole.gk,
+    userRole.coach,
+    userRole.guest,
+  ),
   userController.removedVideo,
 );
 
@@ -46,6 +155,9 @@ router.get(
   // auth(userRole.admin),
   userController.getSingleUserDetails,
 );
+
+// Similar Players — আলাদা endpoint, frontend lazy load করবে
+router.get('/detail/:id/similar-players', userController.getSimilarPlayers);
 router.put(
   '/follow/:targetUserId',
   auth(
