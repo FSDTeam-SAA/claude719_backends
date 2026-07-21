@@ -23,7 +23,7 @@
     "@aws-sdk/lib-storage": "^3.1007.0",
     "@types/fluent-ffmpeg": "^2.1.28",
     "@types/streamifier": "^0.1.2",
-    "axios": "^1.13.4",
+    "axios": "^1.18.0",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",
