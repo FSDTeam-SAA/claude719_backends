@@ -246,6 +246,7 @@ const getAllUser = catchAsync(async (req, res) => {
     'position',
     'category',
     'jerseyNumber',
+    'emailVerified'
   ]);
   const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
   const result = await userService.getAllUser(filters, options);
@@ -269,6 +270,7 @@ const getAllGuest = catchAsync(async (req, res) => {
     'position',
     'category',
     'jerseyNumber',
+    'emailVerified'
   ]);
   const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
   const result = await userService.getAllGuest(filters, options);
