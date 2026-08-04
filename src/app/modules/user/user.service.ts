@@ -584,7 +584,7 @@ const getAllUser = async (params: any, options: IOption) => {
 
   const whereCondition = andCondition.length > 0 ? { $and: andCondition } : {};
 
-  const result = await User.find(whereCondition)
+  const result = await User.find({...whereCondition,emailVerified: true})
     .skip(skip)
     .limit(limit)
     .sort({ [sortBy]: sortOrder } as any);
@@ -593,7 +593,7 @@ const getAllUser = async (params: any, options: IOption) => {
     throw new AppError(404, 'Users not found');
   }
 
-  const total = await User.countDocuments(whereCondition);
+  const total = await User.countDocuments({...whereCondition,emailVerified: true});
 
   return {
     data: result,
