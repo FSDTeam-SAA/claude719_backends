@@ -8,9 +8,9 @@ import { userRole } from '../user/user.constant';
 import User from '../user/user.model';
 
 const dashboardOverview = async (userId: string) => {
-  const totalPlayers = await User.countDocuments({ role: userRole.player });
+  const totalPlayers = await User.countDocuments({ role: userRole.player, emailVerified: true });
   const totalContact = await Contact.countDocuments();
-  const totalGk = await User.countDocuments({ role: userRole.gk });
+  const totalGk = await User.countDocuments({ role: userRole.gk, emailVerified: true });
   const totalRevenew = await Payment.aggregate([
     { $match: { status: 'completed' } },
     { $group: { _id: null, totalRevenue: { $sum: '$amount' } } },
