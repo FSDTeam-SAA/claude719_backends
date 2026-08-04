@@ -188,6 +188,7 @@ const googleLogin = async (idToken: string, role?: string) => {
         provider: 'google',
         verified: true,
         profileImage,
+        emailVerified: true,
       });
 
       console.log('✅ User created with role:', user.role);
