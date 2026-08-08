@@ -8,9 +8,11 @@ import { userRole } from '../user/user.constant';
 import User from '../user/user.model';
 
 const dashboardOverview = async (userId: string) => {
-  const totalPlayers = await User.countDocuments({ role: userRole.player, emailVerified: true });
+  const totalPlayers = await User.countDocuments({ role: userRole.player});
+  const totalVerifiedPlayers = await User.countDocuments({ role: userRole.player, emailVerified: true });
   const totalContact = await Contact.countDocuments();
-  const totalGk = await User.countDocuments({ role: userRole.gk, emailVerified: true });
+  const totalGk = await User.countDocuments({ role: userRole.gk });
+  const totalVerifiedGk = await User.countDocuments({ role: userRole.gk, emailVerified: true });
   const totalRevenew = await Payment.aggregate([
     { $match: { status: 'completed' } },
     { $group: { _id: null, totalRevenue: { $sum: '$amount' } } },
@@ -20,6 +22,8 @@ const dashboardOverview = async (userId: string) => {
     totalRevenew: totalRevenew[0]?.totalRevenue || 0,
     totalPlayers,
     totalContact,
+    totalVerifiedPlayers,
+    totalVerifiedGk,
     totalGk,
   };
 };
