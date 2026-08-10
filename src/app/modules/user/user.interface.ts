@@ -41,13 +41,13 @@ export interface IUser {
   joiningDate?: Date;
   schoolName?: string;
   // designation?: string;
-  nationality?:string;
-  emailVerified?:boolean;
-  emailVerifyToken?:string | undefined;
-  emailVerifyExpires?:Date | undefined;
-  isEvaluation?:boolean;
-  isDevelopment?:boolean;
-  isCombine2026?:boolean;
+  nationality?: string;
+  emailVerified?: boolean;
+  emailVerifyToken?: string | undefined;
+  emailVerifyExpires?: Date | undefined;
+  isEvaluation?: boolean;
+  isDevelopment?: boolean;
+  isCombine2026?: boolean;
   isSubscription?: boolean;
   subscription?: Types.ObjectId;
   subscriptionExpiry?: Date;
@@ -67,4 +67,5 @@ export interface IUser {
   updatedAt: Date;
   followers?: Types.ObjectId[];
   following?: Types.ObjectId[];
+  hilightedUrl?: string[];
 }

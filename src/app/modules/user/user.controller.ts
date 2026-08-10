@@ -219,9 +219,9 @@
 // };
 
 //=============================================== update ============================================================
+import pick from '../../helper/pick';
 import catchAsync from '../../utils/catchAsycn';
 import sendResponse from '../../utils/sendResponse';
-import pick from '../../helper/pick';
 import { userService } from './user.service';
 
 const createUser = catchAsync(async (req, res) => {
@@ -246,7 +246,7 @@ const getAllUser = catchAsync(async (req, res) => {
     'position',
     'category',
     'jerseyNumber',
-    'emailVerified'
+    'emailVerified',
   ]);
   const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
   const result = await userService.getAllUser(filters, options);
@@ -270,7 +270,7 @@ const getAllGuest = catchAsync(async (req, res) => {
     'position',
     'category',
     'jerseyNumber',
-    'emailVerified'
+    'emailVerified',
   ]);
   const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
   const result = await userService.getAllGuest(filters, options);
@@ -439,6 +439,31 @@ const getSimilarPlayers = catchAsync(async (req, res) => {
   });
 });
 
+const addhilightedUrl = catchAsync(async (req, res) => {
+  const { hilightedUrl } = req.body;
+  const result = await userService.addhilightedUrl(req.user.id, hilightedUrl);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Hilighted URL added successfully',
+    data: result,
+  });
+});
+
+const removehilightedUrl = catchAsync(async (req, res) => {
+  const { hilightedUrl } = req.body;
+  const result = await userService.removehilightedUrl(
+    req.user.id,
+    hilightedUrl,
+  );
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Hilighted URL removed successfully',
+    data: result,
+  });
+});
+
 export const userController = {
   createUser,
   getAllUser,
@@ -454,4 +479,6 @@ export const userController = {
   unfollowUser,
   getAllGuest,
   getSimilarPlayers,
+  addhilightedUrl,
+  removehilightedUrl,
 };

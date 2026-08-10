@@ -584,7 +584,7 @@ const getAllUser = async (params: any, options: IOption) => {
 
   const whereCondition = andCondition.length > 0 ? { $and: andCondition } : {};
 
-  const result = await User.find({...whereCondition})
+  const result = await User.find({ ...whereCondition })
     .skip(skip)
     .limit(limit)
     .sort({ [sortBy]: sortOrder } as any);
@@ -593,7 +593,7 @@ const getAllUser = async (params: any, options: IOption) => {
     throw new AppError(404, 'Users not found');
   }
 
-  const total = await User.countDocuments({...whereCondition});
+  const total = await User.countDocuments({ ...whereCondition });
 
   return {
     data: result,
@@ -681,15 +681,23 @@ const getSingleUserDetails = async (id: string) => {
     // সব stat query একসাথে — user fetch এর সাথে parallel এ
     Rating.find({ $or: [{ player: objectId }, { gk: objectId }] }).lean(),
     Gkstats.find({ $or: [{ player: objectId }, { gk: objectId }] }).lean(),
-    Attackingstat.find({ $or: [{ player: objectId }, { gk: objectId }] }).lean(),
+    Attackingstat.find({
+      $or: [{ player: objectId }, { gk: objectId }],
+    }).lean(),
     Fouls.find({ $or: [{ player: objectId }, { gk: objectId }] }).lean(),
     Defensive.find({ $or: [{ player: objectId }, { gk: objectId }] }).lean(),
-    Distributionstats.find({ $or: [{ player: objectId }, { gk: objectId }] }).lean(),
+    Distributionstats.find({
+      $or: [{ player: objectId }, { gk: objectId }],
+    }).lean(),
     Setpieces.find({ $or: [{ player: objectId }, { gk: objectId }] }).lean(),
     National.find({ $or: [{ player: objectId }, { gk: objectId }] }).lean(),
     PlayerReport.find({ $or: [{ player: objectId }, { gk: objectId }] }).lean(),
-    TransferHistory.find({ $or: [{ player: objectId }, { gk: objectId }] }).lean(),
-    GkDistributionStats.find({ $or: [{ player: objectId }, { gk: objectId }] }).lean(),
+    TransferHistory.find({
+      $or: [{ player: objectId }, { gk: objectId }],
+    }).lean(),
+    GkDistributionStats.find({
+      $or: [{ player: objectId }, { gk: objectId }],
+    }).lean(),
     Marketvalue.find({ $or: [{ player: objectId }, { gk: objectId }] }).lean(),
     ratingService.getAverageRatingByUser(id),
   ]);
@@ -1051,10 +1059,7 @@ const similerPlayersAndGK = async (userId: string, baseUser: any) => {
           {
             $match: {
               $expr: {
-                $and: [
-                  { $eq: ['$$role', 'gk'] },
-                  { $eq: ['$gk', '$$uid'] },
-                ],
+                $and: [{ $eq: ['$$role', 'gk'] }, { $eq: ['$gk', '$$uid'] }],
               },
             },
           },
@@ -1097,10 +1102,7 @@ const similerPlayersAndGK = async (userId: string, baseUser: any) => {
           {
             $match: {
               $expr: {
-                $or: [
-                  { $eq: ['$gk', '$$uid'] },
-                  { $eq: ['$player', '$$uid'] },
-                ],
+                $or: [{ $eq: ['$gk', '$$uid'] }, { $eq: ['$player', '$$uid'] }],
               },
             },
           },
@@ -1120,10 +1122,7 @@ const similerPlayersAndGK = async (userId: string, baseUser: any) => {
           {
             $match: {
               $expr: {
-                $or: [
-                  { $eq: ['$gk', '$$uid'] },
-                  { $eq: ['$player', '$$uid'] },
-                ],
+                $or: [{ $eq: ['$gk', '$$uid'] }, { $eq: ['$player', '$$uid'] }],
               },
             },
           },
@@ -1167,205 +1166,27 @@ const similerPlayersAndGK = async (userId: string, baseUser: any) => {
   return results;
 };
 
+const addhilightedUrl = async (userId: string, url: string) => {
+  const user = await User.findByIdAndUpdate(
+    userId,
+    {
+      $push: { hilightedUrl: url },
+    },
+    { new: true },
+  );
+  return user;
+};
 
-
-//================================================================================final code ================================
-// const similerPlayersAndGK = async (userId: string, baseUser: any) => {
-//   if (!baseUser) return [];
-
-//   const mongoose = await import('mongoose');
-//   const baseId = new mongoose.Types.ObjectId(userId);
-
-//   const orConditions: any[] = [];
-//   if (baseUser.age != null) orConditions.push({ age: baseUser.age });
-//   if ((baseUser.position ?? []).length > 0)
-//     orConditions.push({ position: { $in: baseUser.position } });
-//   if (baseUser.nationality)
-//     orConditions.push({ nationality: baseUser.nationality });
-
-//   if (orConditions.length === 0) return [];
-
-//   // একটাই aggregation — সব join MongoDB এর ভেতরেই হবে
-//   const results = await User.aggregate([
-//     // Step 1: similar candidates filter
-//     {
-//       $match: {
-//         _id: { $ne: baseId },
-//         $or: orConditions,
-//       },
-//     },
-//     { $limit: 20 },
-
-//     // Step 2: similarity score MongoDB তেই calculate করো
-//     {
-//       $addFields: {
-//         similarity: {
-//           $multiply: [
-//             {
-//               $divide: [
-//                 {
-//                   $add: [
-//                     { $cond: [{ $eq: ['$age', baseUser.age ?? null] }, 1, 0] },
-//                     {
-//                       $cond: [
-//                         {
-//                           $gt: [
-//                             {
-//                               $size: {
-//                                 $ifNull: [
-//                                   {
-//                                     $setIntersection: [
-//                                       '$position',
-//                                       baseUser.position ?? [],
-//                                     ],
-//                                   },
-//                                   [],
-//                                 ],
-//                               },
-//                             },
-//                             0,
-//                           ],
-//                         },
-//                         1,
-//                         0,
-//                       ],
-//                     },
-//                     {
-//                       $cond: [
-//                         { $eq: ['$nationality', baseUser.nationality ?? null] },
-//                         1,
-//                         0,
-//                       ],
-//                     },
-//                   ],
-//                 },
-//                 3,
-//               ],
-//             },
-//             100,
-//           ],
-//         },
-//       },
-//     },
-//     { $match: { similarity: { $gt: 0 } } },
-//     { $sort: { similarity: -1 } },
-//     { $limit: 6 },
-
-//     // Step 3: GK stats join
-//     {
-//       $lookup: {
-//         from: 'gkstats',
-//         let: { uid: '$_id', role: '$role' },
-//         pipeline: [
-//           {
-//             $match: {
-//               $expr: {
-//                 $and: [{ $eq: ['$$role', 'gk'] }, { $eq: ['$gk', '$$uid'] }],
-//               },
-//             },
-//           },
-//           { $limit: 1 },
-//           { $project: { saves: 1, goalsConceded: 1 } },
-//         ],
-//         as: 'gkStats',
-//       },
-//     },
-
-//     // Step 4: Player (attacking) stats join
-//     {
-//       $lookup: {
-//         from: 'attackingstats',
-//         let: { uid: '$_id', role: '$role' },
-//         pipeline: [
-//           {
-//             $match: {
-//               $expr: {
-//                 $and: [
-//                   { $ne: ['$$role', 'gk'] },
-//                   { $eq: ['$player', '$$uid'] },
-//                 ],
-//               },
-//             },
-//           },
-//           { $limit: 1 },
-//           { $project: { goals: 1, assists: 1 } },
-//         ],
-//         as: 'playerStats',
-//       },
-//     },
-
-//     // Step 5: National team join
-//     {
-//       $lookup: {
-//         from: 'nationals',
-//         let: { uid: '$_id', role: '$role' },
-//         pipeline: [
-//           {
-//             $match: {
-//               $expr: {
-//                 $or: [{ $eq: ['$gk', '$$uid'] }, { $eq: ['$player', '$$uid'] }],
-//               },
-//             },
-//           },
-//           { $limit: 1 },
-//           { $project: { teamName: 1, match: 1, goals: 1, flag: 1 } },
-//         ],
-//         as: 'nationalData',
-//       },
-//     },
-
-//     // Step 6: Transfer history join
-//     {
-//       $lookup: {
-//         from: 'transferhistories',
-//         let: { uid: '$_id', role: '$role' },
-//         pipeline: [
-//           {
-//             $match: {
-//               $expr: {
-//                 $or: [{ $eq: ['$gk', '$$uid'] }, { $eq: ['$player', '$$uid'] }],
-//               },
-//             },
-//           },
-//           { $sort: { createdAt: -1 } },
-//           { $limit: 1 },
-//           {
-//             $project: {
-//               season: 1,
-//               leftClubName: 1,
-//               joinedclubName: 1,
-//               joinedCountery: 1,
-//             },
-//           },
-//         ],
-//         as: 'transferData',
-//       },
-//     },
-
-//     // Step 7: final shape
-//     {
-//       $project: {
-//         _id: 1,
-//         name: { $concat: ['$firstName', ' ', '$lastName'] },
-//         profileImage: 1,
-//         age: 1,
-//         nationality: 1,
-//         position: 1,
-//         teamName: 1,
-//         role: 1,
-//         similarity: { $round: ['$similarity', 0] },
-//         saves: { $arrayElemAt: ['$gkStats.saves', 0] },
-//         goalsConceded: { $arrayElemAt: ['$gkStats.goalsConceded', 0] },
-//         goals: { $arrayElemAt: ['$playerStats.goals', 0] },
-//         assists: { $arrayElemAt: ['$playerStats.assists', 0] },
-//         nationalTeam: { $arrayElemAt: ['$nationalData', 0] },
-//         lastTransfer: { $arrayElemAt: ['$transferData', 0] },
-//       },
-//     },
-//   ]);
-
-//   return results;
-// };
+const removehilightedUrl = async (userId: string, url: string) => {
+  const user = await User.findByIdAndUpdate(
+    userId,
+    {
+      $pull: { hilightedUrl: url },
+    },
+    { new: true },
+  );
+  return user;
+};
 
 export const userService = {
   getSimilarPlayers,
@@ -1382,4 +1203,6 @@ export const userService = {
   followUser,
   unfollowUser,
   getAllGuest,
+  addhilightedUrl,
+  removehilightedUrl,
 };

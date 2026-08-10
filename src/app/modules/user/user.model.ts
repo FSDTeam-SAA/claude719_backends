@@ -245,10 +245,10 @@
 // export default User;
 
 //======================================= update code =========================================
-import mongoose, { Schema } from 'mongoose';
-import { IUser } from './user.interface';
 import bcrypt from 'bcryptjs';
+import mongoose, { Schema } from 'mongoose';
 import { calculateAge } from '../../helper/calculateAge';
+import { IUser } from './user.interface';
 
 const userSchema = new Schema<IUser>(
   {
@@ -452,6 +452,12 @@ const userSchema = new Schema<IUser>(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
+      },
+    ],
+    hilightedUrl: [
+      {
+        type: String,
+        default: '',
       },
     ],
   },

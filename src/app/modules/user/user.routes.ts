@@ -155,7 +155,28 @@ router.get(
   // auth(userRole.admin),
   userController.getSingleUserDetails,
 );
-
+router.post(
+  '/hilighted-url-add',
+  auth(
+    userRole.admin,
+    userRole.player,
+    userRole.gk,
+    userRole.coach,
+    userRole.guest,
+  ),
+  userController.addhilightedUrl,
+);
+router.delete(
+  '/hilighted-url-remove',
+  auth(
+    userRole.admin,
+    userRole.player,
+    userRole.gk,
+    userRole.coach,
+    userRole.guest,
+  ),
+  userController.removehilightedUrl,
+);
 // Similar Players — আলাদা endpoint, frontend lazy load করবে
 router.get('/detail/:id/similar-players', userController.getSimilarPlayers);
 router.put(
