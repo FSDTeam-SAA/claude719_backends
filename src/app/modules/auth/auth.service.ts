@@ -25,36 +25,94 @@ import { HydratedDocument } from 'mongoose';
 //   return user;
 // };
 
-const registerUser = async (payload: Partial<IUser>) => {
-  const exist = await User.findOne({ email: payload.email });
-  if (exist) throw new Error('User already exists');
-
-  payload.provider = 'credentials';
+const sendVerificationEmail = async (user: HydratedDocument<IUser>) => {
   const token = crypto.randomBytes(32).toString('hex');
   const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+  const previousToken = user.emailVerifyToken;
+  const previousExpiry = user.emailVerifyExpires;
+  // Atomically reserve a send slot so repeated requests cannot flood the inbox.
+  const claimed = await User.updateOne(
+    {
+      _id: user._id,
+      emailVerified: false,
+      $or: [
+        { emailVerifyExpires: { $exists: false } },
+        {
+          emailVerifyExpires: {
+            $lte: new Date(Date.now() + 24 * 60 * 60 * 1000 - 60000),
+          },
+        },
+      ],
+    },
+    {
+      $set: {
+        emailVerifyToken: hashedToken,
+        emailVerifyExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      },
+    },
+  );
+  if (!claimed.modifiedCount)
+    throw new AppError(
+      429,
+      'Please wait a minute before requesting another verification email.',
+    );
+  try {
+    const verifyUrl = new URL('/api/v1/auth/verify-email', config.backendUrl);
+    verifyUrl.searchParams.set('token', token);
+    verifyUrl.searchParams.set('email', user.email);
+    await sendMailer(
+      user.email,
+      'Verify your email - Analytic Soccer',
+      '<h3>Please confirm your email address</h3><a href="' +
+        verifyUrl.toString() +
+        '">Verify Email</a><p>This link will expire in 24 hours.</p>',
+    );
+  } catch (error) {
+    await User.updateOne(
+      { _id: user._id, emailVerifyToken: hashedToken, emailVerified: false },
+      {
+        ...(previousToken && previousExpiry
+          ? {
+              $set: {
+                emailVerifyToken: previousToken,
+                emailVerifyExpires: previousExpiry,
+              },
+            }
+          : { $unset: { emailVerifyToken: 1, emailVerifyExpires: 1 } }),
+      },
+    );
+    throw error;
+  }
+};
 
+const resendVerificationEmail = async (email: string, password: string) => {
+  if (typeof email !== 'string' || typeof password !== 'string' || !password)
+    throw new AppError(400, 'Email and password are required');
+  const user = await User.findOne({ email: email.trim().toLowerCase() });
+  if (!user || !(await bcrypt.compare(password, user.password)))
+    throw new AppError(401, 'Email or password is incorrect');
+  if (user.emailVerified)
+    throw new AppError(400, 'Email is already verified. Please sign in.');
+  await sendVerificationEmail(user);
+};
+
+const registerUser = async (payload: Partial<IUser>) => {
+  if (typeof payload.email !== 'string')
+    throw new AppError(400, 'Email is required');
+  payload.email = payload.email.trim().toLowerCase();
+  const exist = await User.findOne({ email: payload.email });
+  if (exist)
+    throw new AppError(
+      409,
+      'Account already exists. Sign in or resend the verification email from the login page.',
+    );
   const user = await User.create({
     ...payload,
-    emailVerifyToken: hashedToken,
-    emailVerifyExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    provider: 'credentials',
+    emailVerified: false,
   });
-
-  const verifyUrl = `${config.backendUrl}/api/v1/auth/verify-email?token=${token}&email=${user.email}`;
-
-  await sendMailer(
-    user.email,
-    user.firstName,
-    `
-    <h3>Please confirm your email address</h3>
-    <a href="${verifyUrl}"
-       style="padding:10px 18px;background:#22c55e;color:#fff;text-decoration:none">
-       Verify Email
-    </a>
-    <p>This link will expire in 24 hours</p>
-    `,
-  );
-
-  return user;
+  await sendVerificationEmail(user);
+  return { _id: user._id, email: user.email };
 };
 
 // const verifyEmailByToken = async (token: string) => {
@@ -86,7 +144,7 @@ const registerUser = async (payload: Partial<IUser>) => {
 const verifyEmailByToken = async (token: string, email: string) => {
   const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
-  let user = await User.findOne({ emailVerifyToken: hashedToken });
+  let user = await User.findOne({ emailVerifyToken: hashedToken, email });
 
   if (!user) {
     // token not found, check email
@@ -96,7 +154,6 @@ const verifyEmailByToken = async (token: string, email: string) => {
   }
 
   if (user.emailVerifyExpires && user.emailVerifyExpires < new Date()) {
-    await User.findByIdAndDelete(user._id);
     throw { statusCode: 410, message: 'Verification link expired' };
   }
 
@@ -331,5 +388,5 @@ export const authService = {
   changePassword,
   googleLogin,
   verifyEmailByToken,
-  // sendVerificationEmail,
+  resendVerificationEmail,
 };
