@@ -28,7 +28,7 @@ const sendMailer = async (email: string, subject?: string, html?: string) => {
     console.error('Email delivery failed:', error.code, error.responseCode);
     throw new AppError(
       503,
-      'Email could not be sent. Please try again later or contact support.',
+      'Email could not be sent. Please try again later or contact supports.',
     );
   }
 };
