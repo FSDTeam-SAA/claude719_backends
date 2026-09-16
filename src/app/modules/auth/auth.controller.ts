@@ -34,7 +34,9 @@ const verifyEmailByToken = catchAsync(async (req, res) => {
     }
 
     // verified successfully → redirect login
-    return res.redirect(`${config.frontendUrl}/login?verified=true`);
+    return res.redirect(
+      new URL('/login?verified=true', config.frontendUrl).toString(),
+    );
   } catch (error: any) {
     if (error.statusCode === 410) {
       return res.status(410).send(expiredHtmlTemplate());
@@ -64,6 +66,16 @@ const verifyEmailByToken = catchAsync(async (req, res) => {
 //     message: 'Verification email sent again',
 //   });
 // });
+
+const resendVerificationEmail = catchAsync(async (req, res) => {
+  await authService.resendVerificationEmail(req.body.email, req.body.password);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message:
+      'Verification email sent. Please check your inbox and spam folder.',
+  });
+});
 
 const loginUser = catchAsync(async (req, res) => {
   const { email, password } = req.body;
@@ -226,5 +238,5 @@ export const authController = {
   googleLogin,
   checkUserExists,
   verifyEmailByToken,
-  // resendVerificationEmail,
+  resendVerificationEmail,
 };

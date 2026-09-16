@@ -55,12 +55,12 @@ export const expiredHtmlTemplate = () => {
       <h1>Verification Link Expired</h1>
       <p>
         Your email verification link has expired.<br/>
-        Your account has been removed for security reasons.
+        You can request a new verification email from the login page.
       </p>
-      <p>Please register again to continue.</p>
+      <p>Enter your email and password, then choose Resend verification email.</p>
 
-      <a href="${config.frontendUrl}/register">
-        Register Again
+      <a href="${new URL('/login', config.frontendUrl).toString()}">
+        Go to Login
       </a>
     </div>
   </body>
