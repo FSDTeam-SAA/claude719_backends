@@ -232,7 +232,8 @@ const googleLogin = async (idToken: string, role?: string) => {
     if (!user) {
       console.log('🆕 New Google user detected');
 
-      const validRoles = ['player', 'admin', 'gk', 'coach', 'guest'] as const;
+      // Public Google signup must never create a privileged account.
+      const validRoles = ['player', 'gk', 'guest'] as const;
       const userRole =
         role && validRoles.includes(role as any) ? role : 'player';
 
