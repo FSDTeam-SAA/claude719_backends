@@ -843,7 +843,7 @@ const payEvaluationSubscription = async (
     throw new AppError(404, 'Subscription not found');
   }
 
-  if (subscription.paymentType !== 'Evaluation') {
+  if (!['Evaluation', 'Online'].includes(subscription.paymentType)) {
     throw new AppError(400, 'This subscription is not for evaluation users.');
   }
 
@@ -1044,7 +1044,7 @@ const payEvaluationSubscription = async (
       orderId: order.id,
       paymentId: payment._id.toString(),
       approvalUrl,
-      amount: subscription.price,
+      amount: finalPrice,
       currency: subscription.currency?.toUpperCase() || 'USD',
       subscriptionTitle: subscription.title,
       message: 'Redirect user to approvalUrl to complete evaluation payment',

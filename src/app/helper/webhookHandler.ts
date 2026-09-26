@@ -129,14 +129,16 @@ const handlePaymentCaptured = async (resource: any) => {
       paymentStatus: 'completed',
       paypalTransactionId: resource.id,
     },
-    { new: true }
+    { new: true },
   );
 
   if (couponUsage) {
     await Coupon.findByIdAndUpdate(couponUsage.coupon, {
-      $inc: { usedCount: 1 }
+      $inc: { usedCount: 1 },
     });
-    console.log('✅ Coupon usage marked as completed and usedCount incremented');
+    console.log(
+      '✅ Coupon usage marked as completed and usedCount incremented',
+    );
   }
   // -------------------------------
 
@@ -174,7 +176,10 @@ const handlePaymentCaptured = async (resource: any) => {
     console.log(`✅ Team subscription activated`);
   }
 
-  if (payment.paymentType === 'Evaluation') {
+  if (
+    payment.paymentType === 'Evaluation' ||
+    payment.paymentType === 'Online'
+  ) {
     await User.findByIdAndUpdate(payment.user, {
       isSubscription: true,
       isEvaluation: true,
