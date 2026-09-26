@@ -9,7 +9,7 @@ export interface ITeamPlayer {
 export interface IPayment {
   user: Types.ObjectId;
   subscription: Types.ObjectId;
-  paymentType: 'Individual' | 'TeamGame' | 'Evaluation';
+  paymentType: 'Individual' | 'TeamGame' | 'Evaluation' | 'Development' | 'Combine_2026'|'Online';
   stripeSessionId: string;
   stripePaymentIntentId?: string;
   amount: number;

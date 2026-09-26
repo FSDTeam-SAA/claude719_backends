@@ -15,6 +15,7 @@ const SubscriptionSchema = new Schema(
         'Evaluation',
         'Development',
         'Combine_2026',
+        'Online',
       ],
       required: true,
     },
