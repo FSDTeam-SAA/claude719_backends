@@ -537,6 +537,30 @@ import { userRole } from './user.constant';
 import { IUser } from './user.interface';
 import User from './user.model';
 
+const hasTextValue = (value: unknown): value is string =>
+  typeof value === 'string' && value.trim().length > 0;
+
+const isUserProfileCompleted = (user: Partial<IUser>) => {
+  const requiredTextFields: (keyof IUser)[] = [
+    'profileImage',
+    'nationality',
+    'birthdayPlace',
+    'gender',
+    'citizenship',
+    'hight',
+    'league',
+    'category',
+    'currentClub',
+    'dob',
+  ];
+
+  return (
+    requiredTextFields.every((field) => hasTextValue(user[field])) &&
+    Array.isArray(user.position) &&
+    user.position.some(hasTextValue)
+  );
+};
+
 const createUser = async (payload: IUser) => {
   const result = await User.create(payload);
   if (!result) {
@@ -780,6 +804,15 @@ const updateUserById = async (
       payload.playingVideo = videoUpload;
     }
   }
+
+  const updatedData = { ...user.toObject(), ...payload };
+  if (
+    updatedData.role === userRole.player ||
+    updatedData.role === userRole.gk
+  ) {
+    payload.isProfileCompleted = isUserProfileCompleted(updatedData);
+  }
+
   const result = await User.findByIdAndUpdate(id, payload, { new: true });
   if (!result) {
     throw new AppError(404, 'User not found');
@@ -898,29 +931,13 @@ const updateMyProfile = async (
     }
   }
 
-  if (user.role === userRole.player || user.role === userRole.gk){
-    const updatedData = { ...user.toObject(), ...payload };
-
-    const isCompleted = !!(
-      updatedData.profileImage &&
-      updatedData.nationality &&
-      updatedData.birthdayPlace &&
-      updatedData.gender &&
-      updatedData.citizenship &&
-      updatedData.hight &&
-      updatedData.league &&
-      updatedData.category &&
-      updatedData.position &&
-      updatedData.currentClub &&
-      updatedData.age &&
-      Array.isArray(updatedData.position) &&
-      updatedData.position.length > 0
-    );
-
-    payload.isProfileCompleted = isCompleted;
+  const updatedData = { ...user.toObject(), ...payload };
+  if (
+    updatedData.role === userRole.player ||
+    updatedData.role === userRole.gk
+  ) {
+    payload.isProfileCompleted = isUserProfileCompleted(updatedData);
   }
-
-
 
   const result = await User.findByIdAndUpdate(id, payload, { new: true });
   if (!result) {
