@@ -911,6 +911,8 @@ const updateMyProfile = async (
       updatedData.league &&
       updatedData.category &&
       updatedData.position &&
+      updatedData.currentClub &&
+      updatedData.age &&
       Array.isArray(updatedData.position) &&
       updatedData.position.length > 0
     );
