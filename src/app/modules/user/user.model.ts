@@ -460,6 +460,10 @@ const userSchema = new Schema<IUser>(
         default: '',
       },
     ],
+    isProfileCompleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );
