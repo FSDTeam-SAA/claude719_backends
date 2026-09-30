@@ -897,6 +897,29 @@ const updateMyProfile = async (
       throw new AppError(400, 'Institute and GPA are required');
     }
   }
+
+  if (user.role === userRole.player || user.role === userRole.gk){
+    const updatedData = { ...user.toObject(), ...payload };
+
+    const isCompleted = !!(
+      updatedData.profileImage &&
+      updatedData.nationality &&
+      updatedData.birthdayPlace &&
+      updatedData.gender &&
+      updatedData.citizenship &&
+      updatedData.hight &&
+      updatedData.league &&
+      updatedData.category &&
+      updatedData.position &&
+      Array.isArray(updatedData.position) &&
+      updatedData.position.length > 0
+    );
+
+    payload.isProfileCompleted = isCompleted;
+  }
+
+
+
   const result = await User.findByIdAndUpdate(id, payload, { new: true });
   if (!result) {
     throw new AppError(404, 'User not found');

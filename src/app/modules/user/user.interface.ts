@@ -68,4 +68,5 @@ export interface IUser {
   followers?: Types.ObjectId[];
   following?: Types.ObjectId[];
   hilightedUrl?: string[];
+  isProfileCompleted?: boolean;
 }
