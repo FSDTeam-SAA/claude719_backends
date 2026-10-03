@@ -540,6 +540,9 @@ import User from './user.model';
 const hasTextValue = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0;
 
+const escapeRegex = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const isUserProfileCompleted = (user: Partial<IUser>) => {
   const requiredTextFields: (keyof IUser)[] = [
     'profileImage',
@@ -571,7 +574,7 @@ const createUser = async (payload: IUser) => {
 
 const getAllUser = async (params: any, options: IOption) => {
   const { page, limit, skip, sortBy, sortOrder } = pagination(options);
-  const { searchTerm, ...filterData } = params;
+  const { searchTerm, fullName, ...filterData } = params;
 
   const andCondition: any[] = [];
   const userSearchableFields = [
@@ -595,6 +598,21 @@ const getAllUser = async (params: any, options: IOption) => {
       $or: userSearchableFields.map((field) => ({
         [field]: { $regex: searchTerm, $options: 'i' },
       })),
+    });
+  }
+
+  const normalizedFullName =
+    typeof fullName === 'string' ? fullName.trim().replace(/\s+/g, ' ') : '';
+
+  if (normalizedFullName) {
+    andCondition.push({
+      $expr: {
+        $regexMatch: {
+          input: { $concat: ['$firstName', ' ', '$lastName'] },
+          regex: escapeRegex(normalizedFullName),
+          options: 'i',
+        },
+      },
     });
   }
 
