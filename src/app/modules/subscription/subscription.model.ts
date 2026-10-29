@@ -4,6 +4,7 @@ const SubscriptionSchema = new Schema(
   {
     title: String,
     price: Number,
+    yearPrice: { type: String, default: '' },
     currency: { type: String, default: 'usd' },
     description: String,
     features: [String],

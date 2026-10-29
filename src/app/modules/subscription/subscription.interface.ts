@@ -2,6 +2,7 @@ export interface ISubscription {
   title: string;
   interval: 'monthly' | 'yearly';
   price: number;
+  yearPrice?: string;
   currency: string;
   status: 'active' | 'inactive';
 
